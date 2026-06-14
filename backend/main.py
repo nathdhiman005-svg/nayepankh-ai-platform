@@ -23,7 +23,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from .chat import router as chat_router
 from .recommendation import router as recommendation_router
 from .content_generator import router as content_generator_router
-from .database import init_database
+from .admin import router as admin_router
+from .database import init_database, create_user
+from .auth import get_password_hash
 
 # ============================================================
 # Load NGO info for the info endpoint
@@ -41,6 +43,19 @@ with open(NGO_INFO_PATH, "r", encoding="utf-8") as f:
 async def lifespan(app: FastAPI):
     """Initialize the database when the server starts."""
     init_database()
+    
+    # Create default head admin if it doesn't exist
+    hashed_head = get_password_hash("admin123")
+    create_user("head_admin", hashed_head, "Head Administrator", "head")
+    
+    # Create dummy manager for testing
+    hashed_manager = get_password_hash("manager123")
+    create_user("manager_dummy", hashed_manager, "Test Manager", "manager")
+    
+    # Create dummy staff for testing
+    hashed_staff = get_password_hash("staff123")
+    create_user("staff_dummy", hashed_staff, "Test Staff", "staff")
+    
     print("[OK] NayePankh AI Assistant Backend is running!")
     print("[INFO] API docs available at: http://localhost:8000/docs")
     yield
@@ -78,6 +93,7 @@ app.add_middleware(
 app.include_router(chat_router)               # /api/chat
 app.include_router(recommendation_router)     # /api/recommend
 app.include_router(content_generator_router)  # /api/generate-content
+app.include_router(admin_router)              # /api/auth/*, /api/staff/*, /api/manager/*, /api/head/*
 
 
 # ============================================================

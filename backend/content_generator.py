@@ -10,9 +10,11 @@ This module handles the campaign content generation feature:
 
 import httpx
 import os
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from dotenv import load_dotenv
+
+from .auth import require_role
 
 load_dotenv()
 
@@ -38,7 +40,7 @@ class ContentResponse(BaseModel):
 
 
 @router.post("/api/generate-content", response_model=ContentResponse)
-async def generate_content(request: ContentRequest):
+async def generate_content(request: ContentRequest, current_user: dict = Depends(require_role(["manager", "head"]))):
     """
     Campaign Content Generator endpoint.
     

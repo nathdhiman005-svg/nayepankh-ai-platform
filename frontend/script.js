@@ -238,70 +238,7 @@ volunteerForm.addEventListener("submit", async (e) => {
 });
 
 
-// ============================================================
-// 4. CAMPAIGN CONTENT GENERATOR
-// ============================================================
-
-const campaignInput = document.getElementById("campaignInput");
-const campaignBtn = document.getElementById("campaignBtn");
-const campaignPlaceholder = document.getElementById("campaignPlaceholder");
-const campaignContent = document.getElementById("campaignContent");
-
-campaignBtn.addEventListener("click", async () => {
-  const topic = campaignInput.value.trim();
-
-  if (!topic) {
-    showToast("Please enter a campaign topic!");
-    return;
-  }
-
-  // Show loading state
-  campaignBtn.disabled = true;
-  campaignBtn.innerHTML = '<span class="spinner"></span> Generating...';
-
-  // Hide placeholder and show loading
-  campaignPlaceholder.style.display = "none";
-  campaignContent.style.display = "block";
-  campaignContent.innerHTML = `
-    <div style="text-align:center; padding: 2rem;">
-      <div class="spinner dark" style="width:40px;height:40px;border-width:4px;"></div>
-      <p style="margin-top:1rem; color: var(--gray-500);">✨ AI is creating content for "${topic}"...</p>
-    </div>
-  `;
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/generate-content`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ campaign_topic: topic })
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      campaignContent.innerHTML = `<p style="color:var(--error);">❌ ${error.detail || "Something went wrong."}</p>`;
-      return;
-    }
-
-    const data = await response.json();
-    campaignContent.innerHTML = formatMarkdown(data.content);
-
-  } catch (error) {
-    campaignContent.innerHTML = `
-      <p style="color:var(--error);">❌ Could not connect to the AI server. 
-      Make sure the backend and Ollama are running.</p>
-    `;
-  } finally {
-    campaignBtn.disabled = false;
-    campaignBtn.innerHTML = '✨ Generate Content';
-  }
-});
-
-// Allow Enter key to trigger generation
-campaignInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    campaignBtn.click();
-  }
-});
+// Campaign logic moved to portal.js
 
 
 // ============================================================

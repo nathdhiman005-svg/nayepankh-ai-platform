@@ -5,3 +5,5 @@ fastapi          # Web framework for building APIs
 uvicorn          # ASGI server to run FastAPI
 httpx             # Async HTTP client (for calling API)
 python-dotenv    # For loading environment variables
+passlib[bcrypt]  # Password hashing
+pyjwt            # JWT authentication
