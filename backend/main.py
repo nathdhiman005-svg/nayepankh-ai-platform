@@ -15,6 +15,7 @@ To run the server:
 
 import json
 import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -25,12 +26,36 @@ from .content_generator import router as content_generator_router
 from .database import init_database
 
 # ============================================================
+# Load NGO info for the info endpoint
+# ============================================================
+NGO_INFO_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "ngo_info.json")
+
+with open(NGO_INFO_PATH, "r", encoding="utf-8") as f:
+    NGO_INFO = json.load(f)
+
+
+# ============================================================
+# Lifespan - runs on startup and shutdown
+# ============================================================
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Initialize the database when the server starts."""
+    init_database()
+    print("[OK] NayePankh AI Assistant Backend is running!")
+    print("[INFO] API docs available at: http://localhost:8000/docs")
+    yield
+    # Shutdown logic (if any) goes here
+    print("[INFO] Server shutting down...")
+
+
+# ============================================================
 # Create the FastAPI application
 # ============================================================
 app = FastAPI(
     title="NayePankh AI Assistant",
     description="AI-powered assistant for NayePankh Foundation - helping visitors learn about the NGO, volunteering, and social initiatives.",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # ============================================================
@@ -53,25 +78,6 @@ app.add_middleware(
 app.include_router(chat_router)               # /api/chat
 app.include_router(recommendation_router)     # /api/recommend
 app.include_router(content_generator_router)  # /api/generate-content
-
-# ============================================================
-# Load NGO info for the info endpoint
-# ============================================================
-NGO_INFO_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "ngo_info.json")
-
-with open(NGO_INFO_PATH, "r", encoding="utf-8") as f:
-    NGO_INFO = json.load(f)
-
-
-# ============================================================
-# Startup event - initialize the database
-# ============================================================
-@app.on_event("startup")
-async def startup():
-    """Initialize the database when the server starts."""
-    init_database()
-    print("[OK] NayePankh AI Assistant Backend is running!")
-    print("[INFO] API docs available at: http://localhost:8000/docs")
 
 
 # ============================================================

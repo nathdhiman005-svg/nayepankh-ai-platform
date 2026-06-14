@@ -1287,6 +1287,57 @@ ul {
   color: var(--primary-400);
 }
 
+/* Social Media Icons */
+.social-icons {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+.social-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.6);
+  transition: all var(--transition-base);
+}
+
+.social-icon:hover {
+  transform: translateY(-3px);
+  color: #fff;
+}
+
+/* Platform-specific hover colors */
+.social-icon[aria-label="Instagram"]:hover {
+  background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  border-color: transparent;
+}
+
+.social-icon[aria-label="LinkedIn"]:hover {
+  background: #0077b5;
+  border-color: transparent;
+}
+
+.social-icon[aria-label="YouTube"]:hover {
+  background: #ff0000;
+  border-color: transparent;
+}
+
+.social-icon[aria-label="Facebook"]:hover {
+  background: #1877f2;
+  border-color: transparent;
+}
+
+.social-icon[aria-label="Twitter / X"]:hover {
+  background: #14171a;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
 /* ============================================================
    Loading Spinner
    ============================================================ */

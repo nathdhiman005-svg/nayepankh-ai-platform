@@ -67,7 +67,7 @@ Guidelines:
 3. Encourage visitors to volunteer or donate
 4. Keep responses concise but informative (2-3 paragraphs max)
 5. If asked about something unrelated to NayePankh, politely redirect the conversation
-6. Use emojis occasionally to be friendly 😊
+6. Use emojis occasionally to be friendly
 """
 
 
@@ -121,6 +121,9 @@ async def chat(request: ChatRequest):
 
         return ChatResponse(response=ai_response)
 
+    except HTTPException:
+        # Re-raise HTTPExceptions (including from ConnectError handling)
+        raise
     except httpx.ConnectError:
         # This happens when Ollama is not running
         raise HTTPException(

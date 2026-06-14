@@ -72,21 +72,21 @@ NAYEPANKH INITIATIVES:
 
 Please provide a personalized recommendation with the following format:
 
-🎯 **Recommended Role**: [Best matching role]
+**Recommended Role**: [Best matching role]
 
-📋 **Why This Role Suits You**: [2-3 sentences explaining the match]
+**Why This Role Suits You**: [2-3 sentences explaining the match]
 
-🌟 **Suggested Activities**:
+**Suggested Activities**:
 - [Activity 1]
 - [Activity 2]  
 - [Activity 3]
 
-💡 **Personalized Contribution Ideas**:
+**Personalized Contribution Ideas**:
 - [Idea 1 based on their specific skills]
 - [Idea 2 based on their interests]
 - [Idea 3 based on their available time]
 
-🚀 **Getting Started**: [Brief next steps to join]
+**Getting Started**: [Brief next steps to join]
 
 Keep the tone warm, encouraging, and professional. Make {request.name} feel valued and excited to contribute!"""
 
@@ -127,6 +127,9 @@ and specific in your recommendations. Use the markdown formatting as specified."
 
         return RecommendationResponse(recommendation=recommendation_text)
 
+    except HTTPException:
+        # Re-raise HTTPExceptions so they don't get caught by the generic handler
+        raise
     except httpx.ConnectError:
         raise HTTPException(
             status_code=503,

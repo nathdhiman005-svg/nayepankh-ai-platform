@@ -94,6 +94,9 @@ with the emoji prefixes."""
 
         return ContentResponse(content=generated_text)
 
+    except HTTPException:
+        # Re-raise HTTPExceptions so they don't get caught by the generic handler
+        raise
     except httpx.ConnectError:
         raise HTTPException(
             status_code=503,
@@ -104,3 +107,4 @@ with the emoji prefixes."""
             status_code=500,
             detail=f"An error occurred: {str(e)}"
         )
+
