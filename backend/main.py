@@ -70,8 +70,8 @@ with open(NGO_INFO_PATH, "r", encoding="utf-8") as f:
 async def startup():
     """Initialize the database when the server starts."""
     init_database()
-    print("🚀 NayePankh AI Assistant Backend is running!")
-    print("📖 API docs available at: http://localhost:8000/docs")
+    print("[OK] NayePankh AI Assistant Backend is running!")
+    print("[INFO] API docs available at: http://localhost:8000/docs")
 
 
 # ============================================================
@@ -86,7 +86,7 @@ async def health_check():
     """
     return {
         "status": "healthy",
-        "message": "NayePankh AI Assistant is running! 🎉"
+        "message": "NayePankh AI Assistant is running!"
     }
 
 

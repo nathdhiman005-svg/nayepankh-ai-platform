@@ -70,7 +70,7 @@ def init_database():
 
     conn.commit()
     conn.close()
-    print("✅ Database initialized successfully!")
+    print("[OK] Database initialized successfully!")
 
 
 def save_chat(user_message: str, ai_response: str):
