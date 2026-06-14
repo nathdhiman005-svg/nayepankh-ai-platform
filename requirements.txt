@@ -1,0 +1,6 @@
+# NayePankh AI Assistant - Python Dependencies
+# Install with: pip install -r requirements.txt
+
+fastapi          # Web framework for building APIs
+uvicorn          # ASGI server to run FastAPI
+httpx             # Async HTTP client (for calling Ollama API)
