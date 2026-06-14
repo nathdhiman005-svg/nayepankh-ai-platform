@@ -1,0 +1,126 @@
+{
+  "name": "NayePankh Foundation",
+  "tagline": "It's that easy to bring a Smile on Their Faces",
+  "registration": "UP Government, 80G & 12A Registered NGO",
+  "description": "NayePankh Foundation is a non-governmental organisation with a strong desire to help the society and make it a better place for all. We are one of the biggest student-led NGOs of India with operations extended across Kanpur, Ghaziabad, and various other cities.",
+  "mission": "Service to mankind is the service to god. We aim to uplift underprivileged communities by providing free food, sanitary pads, clothes, and education.",
+  "vision": "Think global, Act local. To revolutionise society together by doing everything in our power to make the world a better place.",
+  "founder": {
+    "name": "Prashant Shukla",
+    "title": "Founder & President",
+    "quote": "If we all do something, then together there is no problem that we cannot solve!"
+  },
+  "impact": {
+    "volunteers": 5000,
+    "campaigns": 200,
+    "beneficiaries": 200000,
+    "events": 500
+  },
+  "initiatives": [
+    {
+      "id": "education",
+      "title": "Education",
+      "icon": "📚",
+      "description": "Providing free education and learning resources to underprivileged children across India. We organize tuition classes, distribute school supplies, and support students through mentorship programs.",
+      "activities": [
+        "Free tuition classes for underprivileged children",
+        "School supply distribution drives",
+        "Mentorship and career guidance programs",
+        "Digital literacy workshops"
+      ]
+    },
+    {
+      "id": "health",
+      "title": "Health Awareness",
+      "icon": "🏥",
+      "description": "Conducting health awareness campaigns, free medical check-up camps, and distributing sanitary pads to promote hygiene and well-being in underserved communities.",
+      "activities": [
+        "Free medical check-up camps",
+        "Sanitary pad distribution drives",
+        "Health and hygiene awareness sessions",
+        "Mental health awareness workshops"
+      ]
+    },
+    {
+      "id": "women_empowerment",
+      "title": "Women Empowerment",
+      "icon": "💪",
+      "description": "Empowering women through skill development, self-defense training, menstrual hygiene awareness, and creating opportunities for financial independence.",
+      "activities": [
+        "Skill development and vocational training",
+        "Self-defense training workshops",
+        "Menstrual hygiene awareness campaigns",
+        "Women entrepreneurship support programs"
+      ]
+    },
+    {
+      "id": "food_distribution",
+      "title": "Food Distribution",
+      "icon": "🍲",
+      "description": "Distributing free food to the hungry and homeless. We organize regular food drives and community kitchens to ensure no one goes to bed hungry.",
+      "activities": [
+        "Daily food distribution to the homeless",
+        "Community kitchen programs",
+        "Festival food drives",
+        "Emergency food relief during disasters"
+      ]
+    },
+    {
+      "id": "environment",
+      "title": "Environmental Campaigns",
+      "icon": "🌱",
+      "description": "Organizing tree plantation drives, cleanliness campaigns, and environmental awareness programs to protect our planet for future generations.",
+      "activities": [
+        "Tree plantation drives",
+        "Beach and river cleanliness campaigns",
+        "Plastic-free awareness programs",
+        "Environmental education workshops"
+      ]
+    }
+  ],
+  "volunteer_roles": [
+    {
+      "role": "Teaching Volunteer",
+      "description": "Teach underprivileged children in community classes",
+      "skills_needed": ["Teaching", "Patience", "Communication"],
+      "time_commitment": "4-6 hours/week"
+    },
+    {
+      "role": "Event Coordinator",
+      "description": "Plan and organize community events and campaigns",
+      "skills_needed": ["Leadership", "Organization", "Communication"],
+      "time_commitment": "6-8 hours/week"
+    },
+    {
+      "role": "Social Media Manager",
+      "description": "Create content and manage NGO social media presence",
+      "skills_needed": ["Content Creation", "Design", "Social Media"],
+      "time_commitment": "3-5 hours/week"
+    },
+    {
+      "role": "Field Volunteer",
+      "description": "Participate in food drives, health camps, and plantation drives",
+      "skills_needed": ["Physical Fitness", "Teamwork", "Empathy"],
+      "time_commitment": "4-8 hours/week"
+    },
+    {
+      "role": "Fundraising Volunteer",
+      "description": "Help raise funds through campaigns and donor outreach",
+      "skills_needed": ["Communication", "Marketing", "Networking"],
+      "time_commitment": "3-5 hours/week"
+    },
+    {
+      "role": "Technical Volunteer",
+      "description": "Support website, app development, and digital literacy programs",
+      "skills_needed": ["Programming", "Web Development", "IT Skills"],
+      "time_commitment": "5-10 hours/week"
+    }
+  ],
+  "contact": {
+    "email": "contact@nayepankh.com",
+    "phone": "+91-8318500748",
+    "website": "https://www.nayepankh.com",
+    "donate_url": "https://www.nayepankh.com/donate"
+  },
+  "tax_info": "Your donations are tax exempted under 80G of the Indian Income Tax Act"
+}
