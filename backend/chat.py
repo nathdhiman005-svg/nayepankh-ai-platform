@@ -29,7 +29,7 @@ with open(NGO_INFO_PATH, "r", encoding="utf-8") as f:
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
 # The AI model to use
-MODEL_NAME = "llama3.3"
+MODEL_NAME = "llama3.2"
 
 # System prompt that tells the AI how to behave
 SYSTEM_PROMPT = f"""You are a friendly and helpful AI assistant for NayePankh Foundation, 
