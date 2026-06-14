@@ -1,6 +1,6 @@
 # 🕊️ NayePankh AI Assistant
 
-An AI-powered webpage for **NayePankh Foundation** that helps visitors learn about the NGO, volunteering opportunities, and social initiatives — powered by **Ollama + Llama 3.3**.
+An AI-powered webpage for **NayePankh Foundation** that helps visitors learn about the NGO, volunteering opportunities, and social initiatives — powered by **Groq API + Llama 3.3 (70B)**.
 
 ---
 
@@ -30,7 +30,7 @@ Enter a campaign topic (e.g., "Tree Plantation Drive") and the AI generates:
 |-------|-----------|
 | Frontend | HTML, CSS, JavaScript |
 | Backend | Python, FastAPI |
-| AI Model | Ollama + Llama 3.2 |
+| AI Model | Groq Cloud API (Llama 3.3 70B) |
 | Database | SQLite |
 | Data | JSON |
 
@@ -70,19 +70,13 @@ nayepankh-ai-platform/
 - **Python 3.8+** installed
 - **Ollama** installed ([Download Ollama](https://ollama.com/download))
 
-### Step 1: Install Ollama & Pull Llama 3.2
+### Step 1: Get Your Free Groq API Key
 
-```bash
-# Install Ollama from https://ollama.com/download
-
-# Pull the Llama 3.2 model
-ollama pull llama3.3
-
-# Start the Ollama server
-ollama serve
-```
-
-> **Note:** Keep this terminal open — the Ollama server needs to be running for AI features to work.
+1. Go to [console.groq.com](https://console.groq.com) and create a free account.
+2. Navigate to "API Keys" and click "Create API Key".
+3. Copy the generated key.
+4. Open the `.env` file in the root of your project directory.
+5. Paste your key in the file: `GROQ_API_KEY="your_actual_key_here"`
 
 ### Step 2: Setup Backend
 

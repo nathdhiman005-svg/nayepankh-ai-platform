@@ -3,23 +3,28 @@ content_generator.py - AI Campaign Content Generator
 
 This module handles the campaign content generation feature:
 - Receives a campaign topic (e.g., "Tree Plantation Drive")
-- Uses Ollama (Llama 3.3) to generate marketing content
+- Uses Groq API (Llama 3.3 70B) to generate marketing content
 - Returns social media caption, awareness message, and volunteer recruitment text
 - Saves generated content to SQLite
 """
 
 import httpx
+import os
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from .database import save_generated_content
 
 # Create a router for content generation endpoints
 router = APIRouter()
 
-# Ollama API settings
-OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL_NAME = "llama3.2"
+# Groq API settings
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+MODEL_NAME = "llama-3.3-70b-versatile"
 
 
 # Request model
@@ -39,7 +44,7 @@ async def generate_content(request: ContentRequest):
     
     How it works:
     1. Takes a campaign topic from the user
-    2. Asks Ollama to generate three types of content
+    2. Asks Groq API to generate three types of content
     3. Returns the generated content
     4. Saves everything to the database
     """
@@ -69,25 +74,37 @@ that motivates people to participate and contribute. Use the exact format headin
 as specified (Social Media Caption, Awareness Message, Volunteer Recruitment Text) 
 with the emoji prefixes."""
 
-        # Send request to Ollama
-        ollama_request = {
+        # Send request to Groq
+        groq_request = {
             "model": MODEL_NAME,
-            "prompt": prompt,
-            "system": system_prompt,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt}
+            ],
             "stream": False
         }
 
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            response = await client.post(OLLAMA_URL, json=ollama_request)
+        headers = {
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(GROQ_URL, json=groq_request, headers=headers)
 
         if response.status_code != 200:
+            error_detail = response.json().get("error", {}).get("message", "Failed to generate content from Groq.")
             raise HTTPException(
                 status_code=500,
-                detail="Failed to generate content from AI model."
+                detail=f"Groq API Error: {error_detail}"
             )
 
         # Extract generated content
-        generated_text = response.json().get("response", "Unable to generate content.")
+        response_data = response.json()
+        if "choices" in response_data and len(response_data["choices"]) > 0:
+            generated_text = response_data["choices"][0]["message"]["content"]
+        else:
+            generated_text = "Unable to generate content."
 
         # Save to database
         save_generated_content(request.campaign_topic, generated_text)
@@ -100,7 +117,7 @@ with the emoji prefixes."""
     except httpx.ConnectError:
         raise HTTPException(
             status_code=503,
-            detail="Cannot connect to Ollama. Please make sure Ollama is running."
+            detail="Cannot connect to Groq API. Please check your internet connection."
         )
     except Exception as e:
         raise HTTPException(

@@ -3,7 +3,7 @@ chat.py - AI Chatbot for NayePankh Foundation
 
 This module handles the chatbot feature:
 - Receives user messages
-- Sends them to Ollama (Llama 3.3) with NGO context
+- Sends them to Groq API (Llama 3.3 70B) with NGO context
 - Returns AI-generated responses
 - Saves conversations to SQLite
 """
@@ -13,6 +13,10 @@ import os
 import httpx
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 from .database import save_chat
 
@@ -25,11 +29,12 @@ NGO_INFO_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data",
 with open(NGO_INFO_PATH, "r", encoding="utf-8") as f:
     NGO_INFO = json.load(f)
 
-# Ollama API endpoint (default local address)
-OLLAMA_URL = "http://localhost:11434/api/generate"
+# Groq API endpoint
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 # The AI model to use
-MODEL_NAME = "llama3.2"
+MODEL_NAME = "llama-3.3-70b-versatile"
 
 # System prompt that tells the AI how to behave
 SYSTEM_PROMPT = f"""You are a friendly and helpful AI assistant for NayePankh Foundation, 
@@ -88,33 +93,46 @@ async def chat(request: ChatRequest):
     
     How it works:
     1. Takes the user's message
-    2. Sends it to Ollama with the NGO context (system prompt)
+    2. Sends it to Groq API with the NGO context (system prompt)
     3. Gets the AI response
     4. Saves the conversation to SQLite
     5. Returns the response
     """
     try:
-        # Prepare the request for Ollama
-        ollama_request = {
+        # Prepare the request for Groq
+        groq_request = {
             "model": MODEL_NAME,
-            "prompt": request.message,
-            "system": SYSTEM_PROMPT,
-            "stream": False  # We want the complete response at once
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": request.message}
+            ],
+            "stream": False
         }
 
-        # Send request to Ollama (with a generous timeout for AI generation)
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            response = await client.post(OLLAMA_URL, json=ollama_request)
+        # Setup headers with API key
+        headers = {
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        # Send request to Groq
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(GROQ_URL, json=groq_request, headers=headers)
 
         # Check if the request was successful
         if response.status_code != 200:
+            error_detail = response.json().get("error", {}).get("message", "Failed to get response from Groq.")
             raise HTTPException(
                 status_code=500,
-                detail="Failed to get response from AI model. Make sure Ollama is running."
+                detail=f"Groq API Error: {error_detail}"
             )
 
         # Extract the AI's response
-        ai_response = response.json().get("response", "I'm sorry, I couldn't generate a response.")
+        response_data = response.json()
+        if "choices" in response_data and len(response_data["choices"]) > 0:
+            ai_response = response_data["choices"][0]["message"]["content"]
+        else:
+            ai_response = "I'm sorry, I couldn't generate a response."
 
         # Save the conversation to the database
         save_chat(request.message, ai_response)
@@ -125,10 +143,10 @@ async def chat(request: ChatRequest):
         # Re-raise HTTPExceptions (including from ConnectError handling)
         raise
     except httpx.ConnectError:
-        # This happens when Ollama is not running
+        # This happens when there's a network issue
         raise HTTPException(
             status_code=503,
-            detail="Cannot connect to Ollama. Please make sure Ollama is running (run 'ollama serve' in terminal)."
+            detail="Cannot connect to Groq API. Please check your internet connection."
         )
     except Exception as e:
         raise HTTPException(
