@@ -59,6 +59,16 @@ async def recommend(request: RecommendationRequest):
     4. Saves to database and returns the result
     """
     try:
+        # Dynamically load API key so changes to .env take effect immediately
+        load_dotenv(override=True)
+        api_key = os.getenv("GROQ_API_KEY")
+
+        # Check if API key is valid or missing
+        if not api_key or api_key == "your_actual_key_here":
+            mock_recommendation = f"🤖 **Mock Mode Active!**\n\nHi {request.name}! I noticed the Groq API key isn't configured yet.\n\nOnce you add your API key to the `.env` file, I'll analyze your interest in **{request.interests}** and your skills in **{request.skills}** to provide a customized volunteer recommendation.\n\n**Recommended Role**: [Mock] Community Outreach\n\n**Why This Role Suits You**: This is a placeholder response for testing the UI.\n\n**Getting Started**: Update the `GROQ_API_KEY` in your `.env` file to see real AI recommendations!"
+            save_recommendation(request.name, request.interests, request.skills, request.available_time, mock_recommendation)
+            return RecommendationResponse(recommendation=mock_recommendation)
+
         # Build the prompt with user info and available roles
         prompt = f"""Based on the following volunteer profile, provide a personalized volunteer recommendation for NayePankh Foundation.
 
@@ -111,7 +121,7 @@ and specific in your recommendations. Use the markdown formatting as specified."
         }
 
         headers = {
-            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
 

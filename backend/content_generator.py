@@ -51,6 +51,16 @@ async def generate_content(request: ContentRequest, current_user: dict = Depends
     4. Saves everything to the database
     """
     try:
+        # Dynamically load API key so changes to .env take effect immediately
+        load_dotenv(override=True)
+        api_key = os.getenv("GROQ_API_KEY")
+
+        # Check if API key is valid or missing
+        if not api_key or api_key == "your_actual_key_here":
+            mock_content = f"🤖 **Mock Mode Active!**\n\nI noticed the Groq API key isn't configured yet.\n\nOnce you add your API key to the `.env` file, I'll generate high-quality campaign content for **{request.campaign_topic}**.\n\n📱 **Social Media Caption**:\n[Mock Caption Here]\n\n📢 **Awareness Message**:\n[Mock Awareness Message Here]\n\n🤝 **Volunteer Recruitment Text**:\n[Mock Recruitment Text Here]\n\n**Getting Started**: Update the `GROQ_API_KEY` in your `.env` file!"
+            save_generated_content(request.campaign_topic, mock_content)
+            return ContentResponse(content=mock_content)
+
         # Build the content generation prompt
         prompt = f"""Generate compelling campaign content for NayePankh Foundation's campaign: "{request.campaign_topic}"
 
@@ -87,7 +97,7 @@ with the emoji prefixes."""
         }
 
         headers = {
-            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
 

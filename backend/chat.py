@@ -99,6 +99,16 @@ async def chat(request: ChatRequest):
     5. Returns the response
     """
     try:
+        # Dynamically load API key so changes to .env take effect immediately
+        load_dotenv(override=True)
+        api_key = os.getenv("GROQ_API_KEY")
+
+        # Check if API key is valid or missing
+        if not api_key or api_key == "your_actual_key_here":
+            mock_response = "🤖 **Mock Mode Active!**\n\nI noticed you haven't configured your Groq API key yet. Once you add it to the `.env` file, I'll be able to give you real answers about NayePankh Foundation!\n\nFor now, this is a placeholder response so you can test the UI."
+            save_chat(request.message, mock_response)
+            return ChatResponse(response=mock_response)
+
         # Prepare the request for Groq
         groq_request = {
             "model": MODEL_NAME,
@@ -111,7 +121,7 @@ async def chat(request: ChatRequest):
 
         # Setup headers with API key
         headers = {
-            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
 
