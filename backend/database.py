@@ -437,7 +437,7 @@ def get_or_create_conversation(user1_id: int, user2_id: int) -> int:
         conn.close()
         return row['id']
     
-    timestamp = datetime.utcnow().isoformat()
+    timestamp = datetime.utcnow().isoformat() + "Z"
     cursor.execute(
         "INSERT INTO conversations (user1_id, user2_id, updated_at) VALUES (?, ?, ?)",
         (u1, u2, timestamp)
@@ -483,7 +483,7 @@ def get_conversation_messages(conversation_id: int):
     return messages
 
 def add_message(conversation_id: int, sender_id: int, content: str):
-    timestamp = datetime.utcnow().isoformat()
+    timestamp = datetime.utcnow().isoformat() + "Z"
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
