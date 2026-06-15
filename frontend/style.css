@@ -1414,6 +1414,124 @@ ul {
 }
 
 /* ============================================================
+   Volunteer Application Modal
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-container {
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--gray-100);
+  position: relative;
+  transform: translateY(30px) scale(0.95);
+  transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-container {
+  transform: translateY(0) scale(1);
+}
+
+.modal-close {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--gray-200);
+  background: var(--gray-50);
+  color: var(--gray-500);
+  font-size: 1.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  line-height: 1;
+}
+
+.modal-close:hover {
+  background: var(--error);
+  color: #fff;
+  border-color: var(--error);
+}
+
+.modal-header {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.modal-icon {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-sm);
+}
+
+.modal-header h2 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--gray-900);
+  margin-bottom: var(--space-xs);
+}
+
+.modal-header p {
+  font-size: 0.9rem;
+  color: var(--gray-500);
+  margin: 0;
+}
+
+/* Success state inside modal */
+.modal-success {
+  text-align: center;
+  padding: var(--space-xl) 0;
+}
+
+.modal-success .success-icon {
+  font-size: 3.5rem;
+  margin-bottom: var(--space-md);
+  animation: successPop 0.5s ease;
+}
+
+.modal-success h3 {
+  font-size: 1.3rem;
+  color: var(--gray-900);
+  margin-bottom: var(--space-sm);
+}
+
+.modal-success p {
+  font-size: 0.95rem;
+  color: var(--gray-500);
+}
+
+@keyframes successPop {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* ============================================================
    Responsive Design
    ============================================================ */
 @media (max-width: 1024px) {

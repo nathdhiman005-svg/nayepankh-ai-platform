@@ -113,6 +113,8 @@ function buildDashboard() {
         linksHTML = `
             <a class="sidebar-link active" onclick="loadHeadDashboard()">Overview Dashboard</a>
             <a class="sidebar-link" onclick="loadManagerStaff()">All Staff & Managers</a>
+            <a class="sidebar-link" onclick="loadHeadRemovalRequests()">Staff Removal Requests</a>
+            <a class="sidebar-link" onclick="loadHeadVolunteers()">Accepted Volunteers</a>
             <a class="sidebar-link" onclick="loadCampaignAI()">AI Campaign Generator</a>
         `;
         loadHeadDashboard();
@@ -226,7 +228,12 @@ async function loadManagerStaff() {
                 <td>${s.full_name}</td>
                 <td>${s.username}</td>
                 <td>${new Date(s.created_at).toLocaleDateString()}</td>
-                <td><button onclick="removeStaff(${s.id})" class="btn outline-btn small" style="color:red; border-color:red;">Remove</button></td>
+                <td>
+                    ${currentUser.role === 'head' ? 
+                        `<button onclick="removeStaff(${s.id})" class="btn outline-btn small" style="color:red; border-color:red;">Remove</button>` : 
+                        `<button onclick="requestRemoveStaff(${s.id})" class="btn outline-btn small" style="color:#d97706; border-color:#d97706;">Remove Request</button>`
+                    }
+                </td>
             </tr>
         `).join('');
 
@@ -237,13 +244,14 @@ async function loadManagerStaff() {
                     <button class="btn primary-btn small" onclick="document.getElementById('create-staff-form').classList.toggle('hidden')">+ Add Staff</button>
                 </div>
                 <div id="create-staff-form" class="hidden" style="margin: 1rem 0; padding: 1rem; background:#f9fafb; border-radius:0.5rem; display:flex; gap:1rem; flex-wrap:wrap;">
-                    <input type="text" id="new-staff-name" placeholder="Full Name" class="auth-form" style="display:block;">
                     <input type="text" id="new-staff-user" placeholder="Username" class="auth-form" style="display:block;">
                     <input type="password" id="new-staff-pass" placeholder="Password" class="auth-form" style="display:block;">
+                    ${currentUser.role === 'head' ? `
                     <select id="new-staff-role" class="auth-form" style="display:block;">
                         <option value="staff">Staff</option>
-                        ${currentUser.role === 'head' ? '<option value="manager">Manager</option>' : ''}
+                        <option value="manager">Manager</option>
                     </select>
+                    ` : ''}
                     <button class="btn primary-btn" onclick="createStaff()">Create</button>
                 </div>
                 <br>
@@ -259,18 +267,18 @@ async function loadManagerStaff() {
 }
 
 async function createStaff() {
-    const fn = document.getElementById('new-staff-name').value;
     const user = document.getElementById('new-staff-user').value;
     const pass = document.getElementById('new-staff-pass').value;
-    const role = document.getElementById('new-staff-role').value;
+    const roleEl = document.getElementById('new-staff-role');
+    const role = roleEl ? roleEl.value : 'staff';
     
-    if(!fn || !user || !pass) return alert("All fields are required");
+    if(!user || !pass) return alert("Username and password are required");
 
     try {
         const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentUser.access_token}` },
-            body: JSON.stringify({ username: user, password: pass, full_name: fn, role: role })
+            body: JSON.stringify({ username: user, password: pass, role: role })
         });
         
         if (!response.ok) throw new Error("Username taken or invalid");
@@ -287,6 +295,24 @@ async function removeStaff(id) {
         headers: { 'Authorization': `Bearer ${currentUser.access_token}` }
     });
     loadManagerStaff();
+}
+
+async function requestRemoveStaff(id) {
+    if(!confirm("Are you sure you want to send a removal request to the Head Administrator?")) return;
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/manager/staff/${id}/remove-request`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${currentUser.access_token}` }
+        });
+        if(!response.ok) {
+            const err = await response.json();
+            throw new Error(err.detail);
+        }
+        alert("Removal request sent!");
+        loadManagerStaff();
+    } catch(e) {
+        alert(e.message);
+    }
 }
 
 async function loadManagerEvents() {
@@ -314,7 +340,7 @@ async function loadManagerEvents() {
                     <h3>Events</h3>
                     <button class="btn primary-btn small" onclick="showCreateEvent()">+ New Event</button>
                 </div>
-                <div id="create-event-form" class="hidden" style="margin: 1rem 0; padding: 1rem; background:#f9fafb; border-radius:0.5rem; display:flex; gap:1rem;">
+                <div id="create-event-form" style="display:none; margin: 1rem 0; padding: 1rem; background:#f9fafb; border-radius:0.5rem; gap:1rem; align-items:center;">
                     <input type="text" id="ev-title" placeholder="Event Title" class="auth-form" style="display:block;">
                     <input type="date" id="ev-date" class="auth-form" style="display:block;">
                     <input type="text" id="ev-desc" placeholder="Short Description" class="auth-form" style="display:block; flex:1;">
@@ -331,7 +357,12 @@ async function loadManagerEvents() {
 }
 
 function showCreateEvent() {
-    document.getElementById('create-event-form').classList.toggle('hidden');
+    const el = document.getElementById('create-event-form');
+    if (el.style.display === 'none') {
+        el.style.display = 'flex';
+    } else {
+        el.style.display = 'none';
+    }
 }
 
 async function createEvent() {
@@ -345,6 +376,13 @@ async function createEvent() {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentUser.access_token}` },
         body: JSON.stringify({ title, event_date: date, description: desc })
     });
+    
+    // Reset form fields and hide
+    document.getElementById('ev-title').value = '';
+    document.getElementById('ev-date').value = '';
+    document.getElementById('ev-desc').value = '';
+    showCreateEvent();
+    
     loadManagerEvents();
 }
 
@@ -377,19 +415,117 @@ async function loadManagerVolunteers() {
         
         let rows = vols.map(v => `
             <tr>
-                <td>${v.name}</td>
-                <td>${v.skills} / ${v.interests}</td>
-                <td>${v.available_time}</td>
+                <td>${v.name}<br><small>${v.email} | ${v.phone}</small></td>
+                <td>${v.role}</td>
+                <td><small>${new Date(v.timestamp).toLocaleString()}</small></td>
+                <td>
+                    <button onclick="updateVolunteerStatus(${v.id}, 'accepted')" class="btn primary-btn small" style="margin-right:0.5rem; background:#10b981;">Accept</button>
+                    <button onclick="updateVolunteerStatus(${v.id}, 'declined')" class="btn outline-btn small" style="color:red; border-color:red;">Decline</button>
+                </td>
+            </tr>
+        `).join('');
+
+        main.innerHTML = `
+            <div class="data-panel">
+                <h3>Pending Volunteer Applications</h3>
+                <table>
+                    <tr><th>Applicant Details</th><th>Preferred Role</th><th>Applied On</th><th>Action</th></tr>
+                    ${rows || '<tr><td colspan="4">No pending applications found.</td></tr>'}
+                </table>
+            </div>
+        `;
+    } catch(e) {}
+}
+
+async function updateVolunteerStatus(id, status) {
+    if(!confirm(`Are you sure you want to ${status} this application?`)) return;
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/manager/volunteers/${id}/status`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentUser.access_token}` },
+            body: JSON.stringify({ status })
+        });
+        if(!res.ok) throw new Error("Failed to update status");
+        loadManagerVolunteers();
+    } catch(e) {
+        alert(e.message);
+    }
+}
+
+async function loadHeadRemovalRequests() {
+    updateActiveTab(2);
+    const main = document.getElementById('main-content');
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/head/remove-requests`, {
+            headers: { 'Authorization': `Bearer ${currentUser.access_token}` }
+        });
+        const requests = await response.json();
+        
+        let rows = requests.map(r => `
+            <tr>
+                <td>${r.staff_name} (${r.staff_username})</td>
+                <td>${r.manager_name}</td>
+                <td><small>${new Date(r.timestamp).toLocaleString()}</small></td>
+                <td>
+                    <button onclick="resolveRemoveRequest(${r.id}, 'approved', ${r.staff_id})" class="btn primary-btn small" style="margin-right:0.5rem; background:#10b981;">Approve</button>
+                    <button onclick="resolveRemoveRequest(${r.id}, 'rejected', ${r.staff_id})" class="btn outline-btn small" style="color:red; border-color:red;">Reject</button>
+                </td>
+            </tr>
+        `).join('');
+
+        main.innerHTML = `
+            <div class="data-panel">
+                <h3>Pending Staff Removal Requests</h3>
+                <table>
+                    <tr><th>Staff Member</th><th>Requested By</th><th>Requested On</th><th>Action</th></tr>
+                    ${rows || '<tr><td colspan="4">No pending removal requests.</td></tr>'}
+                </table>
+            </div>
+        `;
+    } catch(e) {}
+}
+
+async function resolveRemoveRequest(requestId, status, staffId) {
+    if(!confirm(`Are you sure you want to ${status} this request?`)) return;
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/head/remove-requests/${requestId}/resolve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentUser.access_token}` },
+            body: JSON.stringify({ status, staff_id: staffId })
+        });
+        if(!res.ok) throw new Error("Failed to resolve request");
+        loadHeadRemovalRequests();
+    } catch(e) {
+        alert(e.message);
+    }
+}
+
+async function loadHeadVolunteers() {
+    updateActiveTab(3);
+    const main = document.getElementById('main-content');
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/head/volunteers`, {
+            headers: { 'Authorization': `Bearer ${currentUser.access_token}` }
+        });
+        const vols = await response.json();
+        
+        let rows = vols.map(v => `
+            <tr>
+                <td>${v.name}<br><small>${v.email} | ${v.phone}</small></td>
+                <td>${v.role}</td>
+                <td><span class="badge" style="background:#10b981; color:white; padding: 0.2rem 0.5rem; border-radius: 0.25rem;">Accepted</span></td>
                 <td><small>${new Date(v.timestamp).toLocaleString()}</small></td>
             </tr>
         `).join('');
 
         main.innerHTML = `
             <div class="data-panel">
-                <h3>Public Volunteer Applications</h3>
+                <h3>Accepted Volunteers</h3>
                 <table>
-                    <tr><th>Name</th><th>Skills / Interests</th><th>Availability</th><th>Applied On</th></tr>
-                    ${rows || '<tr><td colspan="4">No applications found.</td></tr>'}
+                    <tr><th>Volunteer Details</th><th>Role</th><th>Status</th><th>Applied On</th></tr>
+                    ${rows || '<tr><td colspan="4">No accepted volunteers found.</td></tr>'}
                 </table>
             </div>
         `;

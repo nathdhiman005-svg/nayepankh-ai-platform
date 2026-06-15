@@ -6,7 +6,9 @@ from .auth import get_password_hash, verify_password, create_access_token, get_c
 from .database import (
     get_user_by_username, create_user, get_users_by_role, delete_user,
     create_event, get_events, record_attendance, get_staff_attendance,
-    get_dashboard_stats, get_recommendations
+    get_dashboard_stats, get_recommendations,
+    create_removal_request, get_pending_removal_requests, resolve_removal_request,
+    get_volunteer_applications_by_status, update_volunteer_application_status
 )
 
 router = APIRouter()
@@ -22,7 +24,7 @@ class LoginRequest(BaseModel):
 class SignupRequest(BaseModel):
     username: str
     password: str
-    full_name: str
+    full_name: Optional[str] = None
     role: str = "staff" # 'staff', 'manager', 'head'
 
 @router.post("/api/auth/signup")
@@ -34,8 +36,9 @@ async def signup(request: SignupRequest, current_user: dict = Depends(require_ro
     if request.role not in ['staff', 'manager', 'head']:
         raise HTTPException(status_code=400, detail="Invalid role")
         
+    actual_full_name = request.full_name if request.full_name else request.username
     hashed_pw = get_password_hash(request.password)
-    success = create_user(request.username, hashed_pw, request.full_name, request.role)
+    success = create_user(request.username, hashed_pw, actual_full_name, request.role)
     
     if not success:
         raise HTTPException(status_code=400, detail="Username already exists")
@@ -98,11 +101,13 @@ async def get_staff_list(current_user: dict = Depends(require_role(["manager", "
     """Managers can view all staff."""
     return get_users_by_role("staff")
 
-@router.delete("/api/manager/staff/{user_id}")
-async def remove_staff(user_id: int, current_user: dict = Depends(require_role(["manager", "head"]))):
-    """Managers can delete staff records."""
-    delete_user(user_id)
-    return {"message": "Staff removed successfully"}
+@router.post("/api/manager/staff/{user_id}/remove-request")
+async def request_remove_staff(user_id: int, current_user: dict = Depends(require_role(["manager"]))):
+    """Managers request removal of staff."""
+    success = create_removal_request(user_id, current_user["id"])
+    if not success:
+        raise HTTPException(status_code=400, detail="A removal request is already pending for this staff")
+    return {"message": "Removal request sent to Head Administrator"}
 
 @router.get("/api/manager/events")
 async def get_all_events(current_user: dict = Depends(require_role(["manager", "head", "staff"]))):
@@ -120,10 +125,21 @@ async def mark_attendance(request: AttendanceRequest, current_user: dict = Depen
         raise HTTPException(status_code=400, detail="Staff already recorded for this event")
     return {"message": "Attendance recorded"}
 
+class VolunteerStatusRequest(BaseModel):
+    status: str
+
 @router.get("/api/manager/volunteers")
-async def view_public_volunteers(current_user: dict = Depends(require_role(["manager", "head"]))):
-    """View volunteer applications from the public website."""
-    return get_recommendations(limit=100)
+async def view_public_volunteers(current_user: dict = Depends(require_role(["manager"]))):
+    """Managers view pending volunteer applications."""
+    return get_volunteer_applications_by_status("pending")
+
+@router.post("/api/manager/volunteers/{application_id}/status")
+async def update_volunteer_status(application_id: int, request: VolunteerStatusRequest, current_user: dict = Depends(require_role(["manager"]))):
+    """Managers accept or decline volunteer applications."""
+    if request.status not in ["accepted", "declined"]:
+        raise HTTPException(status_code=400, detail="Invalid status")
+    update_volunteer_application_status(application_id, request.status)
+    return {"message": f"Application {request.status}"}
 
 # ==========================================
 # HEAD ENDPOINTS
@@ -138,3 +154,30 @@ async def get_head_dashboard(current_user: dict = Depends(require_role(["head"])
         "stats": stats,
         "managers": managers
     }
+
+class ResolveRequest(BaseModel):
+    status: str
+    staff_id: Optional[int] = None
+
+@router.get("/api/head/remove-requests")
+async def view_remove_requests(current_user: dict = Depends(require_role(["head"]))):
+    """Head admin views pending removal requests."""
+    return get_pending_removal_requests()
+
+@router.post("/api/head/remove-requests/{request_id}/resolve")
+async def resolve_remove_request(request_id: int, request: ResolveRequest, current_user: dict = Depends(require_role(["head"]))):
+    """Head admin approves or rejects removal requests."""
+    if request.status not in ["approved", "rejected"]:
+        raise HTTPException(status_code=400, detail="Invalid status")
+    resolve_removal_request(request_id, request.status)
+    
+    # If approved, actually delete the user
+    if request.status == "approved" and request.staff_id:
+        delete_user(request.staff_id)
+    
+    return {"message": f"Request {request.status}"}
+
+@router.get("/api/head/volunteers")
+async def view_accepted_volunteers(current_user: dict = Depends(require_role(["head"]))):
+    """Head admin views only accepted volunteers."""
+    return get_volunteer_applications_by_status("accepted")

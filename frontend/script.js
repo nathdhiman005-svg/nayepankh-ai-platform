@@ -406,6 +406,112 @@ contactForm.addEventListener("submit", (e) => {
 
 
 // ============================================================
+// 8.5 VOLUNTEER APPLICATION MODAL
+// ============================================================
+
+const applyVolunteerBtn = document.getElementById("applyVolunteerBtn");
+const volunteerModal = document.getElementById("volunteerModal");
+const modalCloseBtn = document.getElementById("modalCloseBtn");
+const volunteerApplicationForm = document.getElementById("volunteerApplicationForm");
+const appSubmitBtn = document.getElementById("appSubmitBtn");
+
+/**
+ * Open the volunteer application modal.
+ */
+function openVolunteerModal() {
+  volunteerModal.classList.add("active");
+  document.body.style.overflow = "hidden"; // Prevent background scroll
+}
+
+/**
+ * Close the volunteer application modal.
+ */
+function closeVolunteerModal() {
+  volunteerModal.classList.remove("active");
+  document.body.style.overflow = ""; // Restore scroll
+}
+
+// Open modal on button click
+applyVolunteerBtn.addEventListener("click", openVolunteerModal);
+
+// Close modal on X button click
+modalCloseBtn.addEventListener("click", closeVolunteerModal);
+
+// Close modal on overlay click (outside the form)
+volunteerModal.addEventListener("click", (e) => {
+  if (e.target === volunteerModal) {
+    closeVolunteerModal();
+  }
+});
+
+// Close modal on Escape key
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && volunteerModal.classList.contains("active")) {
+    closeVolunteerModal();
+  }
+});
+
+/**
+ * Handle volunteer application form submission.
+ */
+volunteerApplicationForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const name = document.getElementById("appName").value.trim();
+  const email = document.getElementById("appEmail").value.trim();
+  const phone = document.getElementById("appPhone").value.trim();
+  const role = document.getElementById("appRole").value;
+
+  if (!name || !email || !phone || !role) {
+    showToast("⚠️ Please fill in all fields!");
+    return;
+  }
+
+  // Show loading state
+  appSubmitBtn.disabled = true;
+  appSubmitBtn.innerHTML = '<span class="spinner"></span> Submitting...';
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/volunteer-apply`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, phone, role })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      showToast(`❌ ${error.detail || "Something went wrong. Please try again."}`);
+      return;
+    }
+
+    // Show success state inside the modal
+    const modalContainer = volunteerModal.querySelector(".modal-container");
+    modalContainer.innerHTML = `
+      <button class="modal-close" id="modalCloseBtnSuccess" aria-label="Close modal">&times;</button>
+      <div class="modal-success">
+        <div class="success-icon">🎉</div>
+        <h3>Application Submitted!</h3>
+        <p>Thank you, <strong>${name}</strong>! Your volunteer application for <strong>${role}</strong> has been received. We'll reach out to you at <strong>${email}</strong> soon.</p>
+      </div>
+    `;
+
+    // Attach close handler to the new close button
+    document.getElementById("modalCloseBtnSuccess").addEventListener("click", () => {
+      closeVolunteerModal();
+      // Reset the modal content after closing (with a delay for the animation)
+      setTimeout(() => { location.reload(); }, 300);
+    });
+
+  } catch (error) {
+    showToast("❌ Could not connect to the server. Please make sure the backend is running.");
+  } finally {
+    appSubmitBtn.disabled = false;
+    appSubmitBtn.innerHTML = '🚀 Submit Application';
+  }
+});
+
+
+// ============================================================
 // 9. UTILITY FUNCTIONS
 // ============================================================
 

@@ -99,6 +99,32 @@ def init_database():
         )
     """)
 
+    # 7. Volunteer Applications (Public applications from the website)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS volunteer_applications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            role TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'pending', -- 'pending', 'accepted', 'declined'
+            timestamp TEXT NOT NULL
+        )
+    """)
+
+    # 8. Staff Removal Requests
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS staff_removal_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            staff_id INTEGER NOT NULL,
+            requested_by INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+            timestamp TEXT NOT NULL,
+            FOREIGN KEY (staff_id) REFERENCES users (id),
+            FOREIGN KEY (requested_by) REFERENCES users (id)
+        )
+    """)
+
     conn.commit()
     conn.close()
     print("[OK] Database initialized successfully!")
@@ -134,6 +160,91 @@ def save_generated_content(campaign_topic: str, generated_text: str):
     cursor.execute(
         "INSERT INTO generated_content (campaign_topic, generated_text, timestamp) VALUES (?, ?, ?)",
         (campaign_topic, generated_text, datetime.now().isoformat())
+    )
+    conn.commit()
+    conn.close()
+
+def save_volunteer_application(name: str, email: str, phone: str, role: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO volunteer_applications (name, email, phone, role, status, timestamp) VALUES (?, ?, ?, ?, 'pending', ?)",
+        (name, email, phone, role, datetime.now().isoformat())
+    )
+    conn.commit()
+    conn.close()
+
+def get_volunteer_applications(limit: int = 50):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM volunteer_applications ORDER BY id DESC LIMIT ?", (limit,))
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+def get_volunteer_applications_by_status(status: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM volunteer_applications WHERE status = ? ORDER BY id DESC", (status,))
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+def update_volunteer_application_status(application_id: int, status: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE volunteer_applications SET status = ? WHERE id = ?",
+        (status, application_id)
+    )
+    conn.commit()
+    conn.close()
+
+# ==========================================
+# STAFF REMOVAL REQUESTS HELPERS
+# ==========================================
+
+def create_removal_request(staff_id: int, requested_by: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # Check if pending request already exists
+    cursor.execute("SELECT id FROM staff_removal_requests WHERE staff_id = ? AND status = 'pending'", (staff_id,))
+    if cursor.fetchone():
+        conn.close()
+        return False
+        
+    cursor.execute(
+        "INSERT INTO staff_removal_requests (staff_id, requested_by, timestamp) VALUES (?, ?, ?)",
+        (staff_id, requested_by, datetime.now().isoformat())
+    )
+    conn.commit()
+    conn.close()
+    return True
+
+def get_pending_removal_requests():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT r.id, r.timestamp, 
+               s.id as staff_id, s.username as staff_username, s.full_name as staff_name,
+               m.username as manager_username, m.full_name as manager_name
+        FROM staff_removal_requests r
+        JOIN users s ON r.staff_id = s.id
+        JOIN users m ON r.requested_by = m.id
+        WHERE r.status = 'pending'
+        ORDER BY r.id DESC
+    """)
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+def resolve_removal_request(request_id: int, status: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE staff_removal_requests SET status = ? WHERE id = ?",
+        (status, request_id)
     )
     conn.commit()
     conn.close()

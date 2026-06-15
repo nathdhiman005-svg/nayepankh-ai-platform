@@ -18,13 +18,14 @@ import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 # Import our route modules
 from .chat import router as chat_router
 from .recommendation import router as recommendation_router
 from .content_generator import router as content_generator_router
 from .admin import router as admin_router
-from .database import init_database, create_user
+from .database import init_database, create_user, save_volunteer_application
 from .auth import get_password_hash
 
 # ============================================================
@@ -119,3 +120,29 @@ async def get_ngo_info():
     The frontend uses this to populate the webpage dynamically.
     """
     return NGO_INFO
+
+
+# Request model for volunteer application
+class VolunteerApplicationRequest(BaseModel):
+    name: str
+    email: str
+    phone: str
+    role: str
+
+
+@app.post("/api/volunteer-apply")
+async def volunteer_apply(request: VolunteerApplicationRequest):
+    """
+    Volunteer Application endpoint.
+    Receives applicant details and saves them to the database.
+    """
+    save_volunteer_application(
+        name=request.name,
+        email=request.email,
+        phone=request.phone,
+        role=request.role
+    )
+    return {
+        "status": "success",
+        "message": f"Thank you {request.name}! Your volunteer application has been received."
+    }

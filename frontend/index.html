@@ -285,6 +285,9 @@
             <button type="submit" class="btn btn-primary" id="volunteerSubmitBtn" style="width:100%;">
               🔍 Get AI Recommendation
             </button>
+            <button type="button" class="btn btn-primary" id="applyVolunteerBtn" style="width:100%; margin-top: 0.75rem;">
+              📝 Apply for Volunteer Role
+            </button>
           </form>
         </div>
 
@@ -299,6 +302,49 @@
       </div>
     </div>
   </section>
+
+  <!-- ========== VOLUNTEER APPLICATION MODAL ========== -->
+  <div class="modal-overlay" id="volunteerModal">
+    <div class="modal-container">
+      <button class="modal-close" id="modalCloseBtn" aria-label="Close modal">&times;</button>
+      <div class="modal-header">
+        <div class="modal-icon">🤝</div>
+        <h2>Apply for Volunteer</h2>
+        <p>Join our mission to uplift underprivileged communities. Fill in your details below.</p>
+      </div>
+      <form id="volunteerApplicationForm">
+        <div class="form-group">
+          <label for="appName">👤 Full Name</label>
+          <input type="text" id="appName" placeholder="e.g., Priya Sharma" required>
+        </div>
+        <div class="form-group">
+          <label for="appEmail">📧 Email Address</label>
+          <input type="email" id="appEmail" placeholder="e.g., priya@example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="appPhone">📞 Phone Number</label>
+          <input type="tel" id="appPhone" placeholder="e.g., +91-9876543210" required>
+        </div>
+        <div class="form-group">
+          <label for="appRole">🎯 Preferred Role</label>
+          <select id="appRole" required>
+            <option value="">Select a volunteer role</option>
+            <option value="Teaching Volunteer">Teaching Volunteer</option>
+            <option value="Health Camp Organizer">Health Camp Organizer</option>
+            <option value="Food Drive Coordinator">Food Drive Coordinator</option>
+            <option value="Environmental Campaign Lead">Environmental Campaign Lead</option>
+            <option value="Women Empowerment Mentor">Women Empowerment Mentor</option>
+            <option value="Social Media & Content">Social Media & Content</option>
+            <option value="Event Management">Event Management</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" id="appSubmitBtn" style="width:100%;">
+          🚀 Submit Application
+        </button>
+      </form>
+    </div>
+  </div>
 
 
 
