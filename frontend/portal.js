@@ -770,7 +770,8 @@ async function loadMessagesTab() {
 async function loadConversationsList(silent = false) {
     try {
         const response = await fetch(`${API_BASE_URL}/api/messaging/conversations`, {
-            headers: { 'Authorization': `Bearer ${sessionStorage.getItem('np_token')}` }
+            headers: { 'Authorization': `Bearer ${sessionStorage.getItem('np_token')}` },
+            cache: 'no-store'
         });
         const convs = await response.json();
         
@@ -819,7 +820,8 @@ async function searchUsersForChat() {
     
     try {
         const response = await fetch(`${API_BASE_URL}/api/messaging/users/search?q=${encodeURIComponent(q)}`, {
-            headers: { 'Authorization': `Bearer ${sessionStorage.getItem('np_token')}` }
+            headers: { 'Authorization': `Bearer ${sessionStorage.getItem('np_token')}` },
+            cache: 'no-store'
         });
         const users = await response.json();
         
@@ -880,7 +882,8 @@ async function openConversation(convId, title, silent = false) {
 
     try {
         const response = await fetch(`${API_BASE_URL}/api/messaging/conversations/${convId}/messages`, {
-            headers: { 'Authorization': `Bearer ${sessionStorage.getItem('np_token')}` }
+            headers: { 'Authorization': `Bearer ${sessionStorage.getItem('np_token')}` },
+            cache: 'no-store'
         });
         const messages = await response.json();
         
