@@ -125,6 +125,34 @@ def init_database():
         )
     """)
 
+    # 9. Conversations
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS conversations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user1_id INTEGER NOT NULL,
+            user2_id INTEGER NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY (user1_id) REFERENCES users (id),
+            FOREIGN KEY (user2_id) REFERENCES users (id),
+            UNIQUE(user1_id, user2_id)
+        )
+    """)
+
+    # 10. Messages
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            conversation_id INTEGER NOT NULL,
+            sender_id INTEGER NOT NULL,
+            content TEXT NOT NULL,
+            is_read INTEGER DEFAULT 0,
+            is_deleted INTEGER DEFAULT 0,
+            timestamp TEXT NOT NULL,
+            FOREIGN KEY (conversation_id) REFERENCES conversations (id),
+            FOREIGN KEY (sender_id) REFERENCES users (id)
+        )
+    """)
+
     conn.commit()
     conn.close()
     print("[OK] Database initialized successfully!")
@@ -393,3 +421,110 @@ def get_dashboard_stats():
         "event_count": event_count,
         "volunteer_count": volunteer_count
     }
+
+# ==========================================
+# INTERNAL MESSAGING HELPERS
+# ==========================================
+
+def get_or_create_conversation(user1_id: int, user2_id: int) -> int:
+    # Ensure user1_id < user2_id to maintain uniqueness
+    u1, u2 = min(user1_id, user2_id), max(user1_id, user2_id)
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM conversations WHERE user1_id = ? AND user2_id = ?", (u1, u2))
+    row = cursor.fetchone()
+    if row:
+        conn.close()
+        return row['id']
+    
+    timestamp = datetime.utcnow().isoformat()
+    cursor.execute(
+        "INSERT INTO conversations (user1_id, user2_id, updated_at) VALUES (?, ?, ?)",
+        (u1, u2, timestamp)
+    )
+    conv_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return conv_id
+
+def get_user_conversations(user_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    # Fetch conversations, along with the other user's info, latest non-deleted message, and unread count
+    query = """
+        SELECT c.id, c.updated_at,
+               u.id as other_user_id, u.username as other_username, u.full_name as other_full_name, u.role as other_role,
+               (SELECT content FROM messages m WHERE m.conversation_id = c.id AND m.is_deleted = 0 ORDER BY m.timestamp DESC LIMIT 1) as last_message,
+               (SELECT timestamp FROM messages m WHERE m.conversation_id = c.id AND m.is_deleted = 0 ORDER BY m.timestamp DESC LIMIT 1) as last_message_time,
+               (SELECT COUNT(*) FROM messages m WHERE m.conversation_id = c.id AND m.is_read = 0 AND m.sender_id != ?) as unread_count
+        FROM conversations c
+        JOIN users u ON (c.user1_id = u.id OR c.user2_id = u.id) AND u.id != ?
+        WHERE c.user1_id = ? OR c.user2_id = ?
+        ORDER BY last_message_time DESC NULLS LAST, c.updated_at DESC
+    """
+    cursor.execute(query, (user_id, user_id, user_id, user_id))
+    conversations = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return conversations
+
+def get_conversation_messages(conversation_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT m.id, m.conversation_id, m.sender_id, m.content, m.is_read, m.is_deleted, m.timestamp,
+               u.username as sender_username, u.role as sender_role
+        FROM messages m
+        JOIN users u ON m.sender_id = u.id
+        WHERE m.conversation_id = ?
+        ORDER BY m.timestamp ASC
+    """, (conversation_id,))
+    messages = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return messages
+
+def add_message(conversation_id: int, sender_id: int, content: str):
+    timestamp = datetime.utcnow().isoformat()
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO messages (conversation_id, sender_id, content, timestamp) VALUES (?, ?, ?, ?)",
+        (conversation_id, sender_id, content, timestamp)
+    )
+    msg_id = cursor.lastrowid
+    # Update conversation updated_at
+    cursor.execute("UPDATE conversations SET updated_at = ? WHERE id = ?", (timestamp, conversation_id))
+    conn.commit()
+    conn.close()
+    return msg_id
+
+def mark_conversation_read(conversation_id: int, user_id: int):
+    # user_id is the person reading the messages, so mark messages where sender_id != user_id as read
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE messages SET is_read = 1 WHERE conversation_id = ? AND sender_id != ? AND is_read = 0",
+        (conversation_id, user_id)
+    )
+    conn.commit()
+    conn.close()
+
+def delete_message(message_id: int, user_id: int):
+    # Only allow soft delete if the user is the sender
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE messages SET is_deleted = 1 WHERE id = ? AND sender_id = ?",
+        (message_id, user_id)
+    )
+    success = cursor.rowcount > 0
+    conn.commit()
+    conn.close()
+    return success
+
+def get_conversation_by_id(conversation_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM conversations WHERE id = ?", (conversation_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None

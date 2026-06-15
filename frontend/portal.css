@@ -219,5 +219,20 @@ th {
 .flex-between {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+}
+
+/* Chat Custom Styles */
+.conv-item:hover {
+    background: #f3f4f6 !important;
+}
+
+#chat-messages::-webkit-scrollbar,
+#conversations-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chat-messages::-webkit-scrollbar-thumb,
+#conversations-list::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
 }

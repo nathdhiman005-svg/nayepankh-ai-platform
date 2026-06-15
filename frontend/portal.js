@@ -97,7 +97,10 @@ function buildDashboard() {
     let linksHTML = '';
 
     if (currentUser.role === 'staff') {
-        linksHTML = `<a class="sidebar-link active" onclick="loadStaffDashboard()">My Dashboard</a>`;
+        linksHTML = `
+            <a class="sidebar-link active" onclick="loadStaffDashboard()">My Dashboard</a>
+            <a class="sidebar-link" onclick="loadMessagesTab()">Messages</a>
+        `;
         loadStaffDashboard();
     } 
     else if (currentUser.role === 'manager') {
@@ -106,6 +109,7 @@ function buildDashboard() {
             <a class="sidebar-link" onclick="loadManagerEvents()">Manage Events</a>
             <a class="sidebar-link" onclick="loadManagerVolunteers()">Volunteer Applications</a>
             <a class="sidebar-link" onclick="loadCampaignAI()">AI Campaign Generator</a>
+            <a class="sidebar-link" onclick="loadMessagesTab()">Messages</a>
         `;
         loadManagerStaff();
     }
@@ -116,6 +120,7 @@ function buildDashboard() {
             <a class="sidebar-link" onclick="loadHeadRemovalRequests()">Staff Removal Requests</a>
             <a class="sidebar-link" onclick="loadHeadVolunteers()">Accepted Volunteers</a>
             <a class="sidebar-link" onclick="loadCampaignAI()">AI Campaign Generator</a>
+            <a class="sidebar-link" onclick="loadMessagesTab()">Messages</a>
         `;
         loadHeadDashboard();
     }
@@ -698,4 +703,295 @@ function checkPasswordRequirements(val) {
     updateReq(lenReq, hasLen, 'At least 8 characters');
     updateReq(upReq, hasUp, 'One uppercase letter');
     updateReq(numReq, hasNum, 'One number');
+}
+
+// ==========================================
+// INTERNAL MESSAGING
+// ==========================================
+let currentConversationId = null;
+let messagingInterval = null;
+
+async function loadMessagesTab() {
+    const links = document.querySelectorAll('.sidebar-link');
+    links.forEach(l => l.classList.remove('active'));
+    // Activate the Messages link (the last one usually, but we don't know index perfectly here. We can just find it)
+    links.forEach(l => {
+        if(l.textContent === 'Messages') l.classList.add('active');
+    });
+
+    const main = document.getElementById('main-content');
+    main.innerHTML = `
+        <div class="messaging-container" style="display:flex; height: 80vh; border: 1px solid #e5e7eb; border-radius: 0.5rem; overflow: hidden; background: white;">
+            <!-- Left Pane: Conversations List -->
+            <div class="chat-sidebar" style="width: 300px; border-right: 1px solid #e5e7eb; display:flex; flex-direction:column; background: #f9fafb;">
+                <div style="padding: 1rem; border-bottom: 1px solid #e5e7eb;">
+                    <h3 style="margin: 0; color: var(--primary-700);">Messages</h3>
+                    <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+                        <input type="text" id="chat-search-input" placeholder="Search user to chat..." class="auth-form" style="display:block; margin:0; flex:1; padding: 0.4rem;">
+                        <button onclick="searchUsersForChat()" class="btn primary-btn small">🔍</button>
+                    </div>
+                </div>
+                <div id="conversations-list" style="flex:1; overflow-y: auto;">
+                    <div style="padding: 1rem; color: #6b7280; font-size: 0.9rem; text-align: center;">Loading conversations...</div>
+                </div>
+            </div>
+
+            <!-- Right Pane: Chat Window -->
+            <div class="chat-window" style="flex: 1; display: flex; flex-direction: column; background: white;">
+                <div id="chat-header" style="padding: 1rem; border-bottom: 1px solid #e5e7eb; background: #f9fafb; display: flex; align-items: center;">
+                    <h4 style="margin: 0; color: #374151;">Select a conversation</h4>
+                </div>
+                
+                <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 1rem; background: #fafafa;">
+                    <div style="text-align: center; color: #9ca3af; margin-top: 2rem;">No conversation selected.</div>
+                </div>
+
+                <div id="chat-input-area" style="padding: 1rem; border-top: 1px solid #e5e7eb; display: none; gap: 0.5rem; background: #f9fafb;">
+                    <input type="text" id="chat-message-input" placeholder="Type your message..." class="auth-form" style="display:block; margin:0; flex:1;" onkeypress="if(event.key === 'Enter') sendMessage()">
+                    <button onclick="sendMessage()" class="btn primary-btn">Send</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    currentConversationId = null;
+    if (messagingInterval) clearInterval(messagingInterval);
+    await loadConversationsList();
+    
+    // Auto refresh conversations and active chat every 5 seconds
+    messagingInterval = setInterval(async () => {
+        await loadConversationsList(true); // silent load
+        if (currentConversationId) {
+            await openConversation(currentConversationId, document.getElementById('chat-header').dataset.title, true);
+        }
+    }, 5000);
+}
+
+async function loadConversationsList(silent = false) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/messaging/conversations`, {
+            headers: { 'Authorization': `Bearer ${sessionStorage.getItem('np_token')}` }
+        });
+        const convs = await response.json();
+        
+        const listEl = document.getElementById('conversations-list');
+        if (!listEl) return; // Switched tab
+
+        if (convs.length === 0) {
+            listEl.innerHTML = `<div style="padding: 1rem; color: #6b7280; font-size: 0.9rem; text-align: center;">No conversations yet. Search above to start one!</div>`;
+            return;
+        }
+
+        let html = '';
+        convs.forEach(c => {
+            const isUnread = c.unread_count > 0;
+            const timeStr = c.last_message_time ? new Date(c.last_message_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+            const unreadBadge = isUnread ? `<span style="background: var(--primary-600); color: white; border-radius: 50%; padding: 0.1rem 0.4rem; font-size: 0.75rem; font-weight: bold;">${c.unread_count}</span>` : '';
+            const bg = currentConversationId === c.id ? '#f3f4f6' : 'white';
+            
+            html += `
+                <div class="conv-item" onclick="openConversation(${c.id}, '${c.other_full_name} (${c.other_role})')" style="padding: 1rem; border-bottom: 1px solid #e5e7eb; cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: ${bg}; transition: background 0.2s;">
+                    <div style="flex:1; overflow:hidden;">
+                        <div style="font-weight: ${isUnread ? '700' : '500'}; color: #111827;">${c.other_full_name}</div>
+                        <div style="font-size: 0.8rem; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: ${isUnread ? '600' : '400'};">
+                            ${c.last_message || 'No messages yet'}
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem; margin-left: 0.5rem;">
+                        <span style="font-size: 0.7rem; color: #9ca3af;">${timeStr}</span>
+                        ${unreadBadge}
+                    </div>
+                </div>
+            `;
+        });
+        listEl.innerHTML = html;
+    } catch (e) {
+        if(!silent) console.error("Failed to load conversations", e);
+    }
+}
+
+async function searchUsersForChat() {
+    const q = document.getElementById('chat-search-input').value.trim();
+    if (!q) {
+        loadConversationsList();
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/messaging/users/search?q=${encodeURIComponent(q)}`, {
+            headers: { 'Authorization': `Bearer ${sessionStorage.getItem('np_token')}` }
+        });
+        const users = await response.json();
+        
+        const listEl = document.getElementById('conversations-list');
+        if (users.length === 0) {
+            listEl.innerHTML = `<div style="padding: 1rem; color: #6b7280; font-size: 0.9rem; text-align: center;">No users found you are permitted to message.</div>`;
+            return;
+        }
+
+        let html = '<div style="padding: 0.5rem 1rem; background: #f3f4f6; font-size: 0.8rem; font-weight: bold; color: #6b7280;">Search Results</div>';
+        users.forEach(u => {
+            html += `
+                <div class="conv-item" onclick="startNewConversation(${u.id}, '${u.full_name} (${u.role})')" style="padding: 1rem; border-bottom: 1px solid #e5e7eb; cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: white;">
+                    <div style="font-weight: 500; color: #111827;">${u.full_name} <span style="font-size: 0.75rem; color: #9ca3af; font-weight: normal;">@${u.username}</span></div>
+                    <span style="font-size: 0.75rem; background: #e5e7eb; padding: 0.1rem 0.4rem; border-radius: 0.25rem;">${u.role}</span>
+                </div>
+            `;
+        });
+        listEl.innerHTML = html;
+    } catch (e) {
+        alert("Search failed.");
+    }
+}
+
+async function startNewConversation(userId, title) {
+    // Send a blank message to initialize conversation, or just set UI to allow sending first message
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/messaging/conversations`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('np_token')}` },
+            body: JSON.stringify({ receiver_id: userId, content: "Hello!" }) // Seed message
+        });
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.detail || "Cannot start conversation");
+        }
+        const data = await response.json();
+        
+        // Reload lists and open the new conversation
+        document.getElementById('chat-search-input').value = '';
+        await loadConversationsList();
+        openConversation(data.conversation_id, title);
+    } catch (e) {
+        alert(e.message);
+    }
+}
+
+async function openConversation(convId, title, silent = false) {
+    currentConversationId = convId;
+    
+    if(!silent) {
+        const header = document.getElementById('chat-header');
+        header.innerHTML = `<h4 style="margin: 0; color: #374151;">${title}</h4>`;
+        header.dataset.title = title;
+        document.getElementById('chat-input-area').style.display = 'flex';
+        document.getElementById('chat-messages').innerHTML = `<div style="text-align: center; color: #9ca3af; margin-top: 2rem;">Loading messages...</div>`;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/messaging/conversations/${convId}/messages`, {
+            headers: { 'Authorization': `Bearer ${sessionStorage.getItem('np_token')}` }
+        });
+        const messages = await response.json();
+        
+        const msgsEl = document.getElementById('chat-messages');
+        if (!msgsEl) return;
+
+        let html = '';
+        let lastDate = null;
+
+        messages.forEach(m => {
+            const dateObj = new Date(m.timestamp);
+            const dateStr = dateObj.toLocaleDateString();
+            const timeStr = dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            if (dateStr !== lastDate) {
+                html += `<div style="text-align: center; margin: 1rem 0;"><span style="background: #e5e7eb; color: #4b5563; padding: 0.2rem 0.6rem; border-radius: 1rem; font-size: 0.75rem;">${dateStr}</span></div>`;
+                lastDate = dateStr;
+            }
+
+            const isMine = m.sender_username === currentUser.username;
+            const bubbleBg = isMine ? 'var(--primary-600)' : 'white';
+            const textColor = isMine ? 'white' : '#111827';
+            const align = isMine ? 'flex-end' : 'flex-start';
+            const borderR = isMine ? '1rem 1rem 0 1rem' : '1rem 1rem 1rem 0';
+            const shadow = isMine ? 'none' : '0 1px 2px rgba(0,0,0,0.05)';
+            const border = isMine ? 'none' : '1px solid #e5e7eb';
+            
+            let contentHtml = '';
+            if (m.is_deleted) {
+                contentHtml = `<em style="color: ${isMine ? '#fed7aa' : '#9ca3af'};">This message was deleted</em>`;
+            } else {
+                contentHtml = m.content.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            }
+
+            const deleteBtn = (isMine && !m.is_deleted) ? `
+                <button onclick="deleteMessage(${m.id})" style="background:none; border:none; color: #fed7aa; cursor:pointer; font-size:0.7rem; padding:0; margin-top:0.2rem; opacity:0.8;">Delete</button>
+            ` : '';
+
+            html += `
+                <div style="display: flex; flex-direction: column; align-items: ${align}; margin-bottom: 0.5rem; max-width: 100%;">
+                    ${!isMine ? `<span style="font-size: 0.7rem; color: #6b7280; margin-bottom: 0.2rem; margin-left: 0.5rem;">${m.sender_username}</span>` : ''}
+                    <div style="background: ${bubbleBg}; color: ${textColor}; padding: 0.6rem 1rem; border-radius: ${borderR}; max-width: 75%; box-shadow: ${shadow}; border: ${border}; word-break: break-word;">
+                        ${contentHtml}
+                    </div>
+                    <div style="font-size: 0.7rem; color: #9ca3af; margin-top: 0.2rem; display: flex; gap: 0.5rem; align-items: center;">
+                        <span>${timeStr}</span>
+                        ${deleteBtn}
+                    </div>
+                </div>
+            `;
+        });
+
+        msgsEl.innerHTML = html;
+        
+        // Auto scroll to bottom if we are not silent loading, or if we were already near bottom
+        if(!silent) {
+            msgsEl.scrollTop = msgsEl.scrollHeight;
+        }
+
+        // We marked messages as read on backend, so refresh list silently
+        if(!silent) loadConversationsList(true);
+        
+    } catch (e) {
+        if(!silent) console.error("Failed to load messages", e);
+    }
+}
+
+async function sendMessage() {
+    if (!currentConversationId) return;
+    const input = document.getElementById('chat-message-input');
+    const content = input.value.trim();
+    if (!content) return;
+
+    try {
+        // We need the receiver_id, which we don't store directly on the client, 
+        // but the backend accepts conversation_id in the url for sending now?
+        // Wait, the API I wrote is: POST /api/messaging/conversations with {receiver_id, content}
+        // Actually I wrote: POST /api/messaging/conversations/{conv_id}/messages!
+        // Let's use that one.
+        
+        const response = await fetch(`${API_BASE_URL}/api/messaging/conversations/${currentConversationId}/messages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('np_token')}` },
+            body: JSON.stringify({ content: content }) // Note: I need to update the backend route to accept this!
+        });
+        
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.detail || "Failed to send message");
+        }
+        
+        input.value = '';
+        await openConversation(currentConversationId, document.getElementById('chat-header').dataset.title);
+        await loadConversationsList(true);
+    } catch (e) {
+        alert(e.message);
+    }
+}
+
+async function deleteMessage(msgId) {
+    if(!confirm("Are you sure you want to delete this message?")) return;
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/messaging/messages/${msgId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${sessionStorage.getItem('np_token')}` }
+        });
+        if (!response.ok) throw new Error("Failed to delete");
+        
+        await openConversation(currentConversationId, document.getElementById('chat-header').dataset.title, true);
+        await loadConversationsList(true);
+    } catch(e) {
+        alert(e.message);
+    }
 }

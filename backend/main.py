@@ -25,6 +25,7 @@ from .chat import router as chat_router
 from .recommendation import router as recommendation_router
 from .content_generator import router as content_generator_router
 from .admin import router as admin_router
+from .messaging import router as messaging_router
 from .database import init_database, create_user, save_volunteer_application
 from .auth import get_password_hash
 
@@ -95,6 +96,7 @@ app.include_router(chat_router)               # /api/chat
 app.include_router(recommendation_router)     # /api/recommend
 app.include_router(content_generator_router)  # /api/generate-content
 app.include_router(admin_router)              # /api/auth/*, /api/staff/*, /api/manager/*, /api/head/*
+app.include_router(messaging_router)          # /api/messaging/*
 
 
 # ============================================================
