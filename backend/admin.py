@@ -145,6 +145,14 @@ async def update_volunteer_status(application_id: int, request: VolunteerStatusR
 # HEAD ENDPOINTS
 # ==========================================
 
+@router.delete("/api/head/staff/{user_id}")
+async def remove_staff_direct(user_id: int, current_user: dict = Depends(require_role(["head"]))):
+    """Head admin can directly delete staff."""
+    success = delete_user(user_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": "Staff removed"}
+
 @router.get("/api/head/dashboard")
 async def get_head_dashboard(current_user: dict = Depends(require_role(["head"]))):
     """Head dashboard data: aggregate stats and all users."""

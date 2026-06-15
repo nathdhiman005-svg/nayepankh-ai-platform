@@ -383,7 +383,7 @@ def get_dashboard_stats():
     cursor.execute("SELECT COUNT(*) as count FROM events")
     event_count = cursor.fetchone()['count']
     
-    cursor.execute("SELECT COUNT(*) as count FROM recommendations")
+    cursor.execute("SELECT COUNT(*) as count FROM volunteer_applications WHERE status = 'accepted'")
     volunteer_count = cursor.fetchone()['count']
     
     conn.close()

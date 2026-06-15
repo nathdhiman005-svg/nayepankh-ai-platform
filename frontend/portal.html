@@ -32,9 +32,14 @@
                         <option value="staff">Normal Staff</option>
                     </select>
                 </div>
-                <input type="text" id="login-username" placeholder="Username" required>
-                <input type="password" id="login-password" placeholder="Password" required>
-                <button class="btn primary-btn" onclick="login()">Login</button>
+                <input type="text" id="login-username" placeholder="Username" pattern="^[a-zA-Z0-9_]+$" title="Only letters, numbers, and underscores allowed" required>
+                <div style="position: relative; width: 100%; margin-bottom: 1.5rem;">
+                    <input type="password" id="login-password" placeholder="Password" style="width: 100%; padding: 0.75rem; padding-right: 3rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-family: inherit; box-sizing: border-box;" required>
+                    <button type="button" onclick="togglePasswordIcon('login-password', this)" style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #6b7280; padding: 0.25rem; display: flex; align-items: center; justify-content: center;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+                <button class="btn primary-btn" onclick="login()" style="width: 100%;">Login</button>
                 <p id="login-error" class="error-msg"></p>
             </div>
 
@@ -63,6 +68,6 @@
         </div>
     </div>
 
-    <script src="portal.js"></script>
+    <script src="portal.js?v=2"></script>
 </body>
 </html>

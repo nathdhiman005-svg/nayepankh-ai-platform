@@ -112,7 +112,7 @@ function buildDashboard() {
     else if (currentUser.role === 'head') {
         linksHTML = `
             <a class="sidebar-link active" onclick="loadHeadDashboard()">Overview Dashboard</a>
-            <a class="sidebar-link" onclick="loadManagerStaff()">All Staff & Managers</a>
+            <a class="sidebar-link" onclick="loadManagerStaff()">All Staff Details</a>
             <a class="sidebar-link" onclick="loadHeadRemovalRequests()">Staff Removal Requests</a>
             <a class="sidebar-link" onclick="loadHeadVolunteers()">Accepted Volunteers</a>
             <a class="sidebar-link" onclick="loadCampaignAI()">AI Campaign Generator</a>
@@ -225,6 +225,7 @@ async function loadManagerStaff() {
         
         let rows = staffList.map(s => `
             <tr>
+                <td><strong>#${s.id}</strong></td>
                 <td>${s.full_name}</td>
                 <td>${s.username}</td>
                 <td>${new Date(s.created_at).toLocaleDateString()}</td>
@@ -243,21 +244,54 @@ async function loadManagerStaff() {
                     <h3>Staff Directory</h3>
                     <button class="btn primary-btn small" onclick="document.getElementById('create-staff-form').classList.toggle('hidden')">+ Add Staff</button>
                 </div>
-                <div id="create-staff-form" class="hidden" style="margin: 1rem 0; padding: 1rem; background:#f9fafb; border-radius:0.5rem; display:flex; gap:1rem; flex-wrap:wrap;">
-                    <input type="text" id="new-staff-user" placeholder="Username" class="auth-form" style="display:block;">
-                    <input type="password" id="new-staff-pass" placeholder="Password" class="auth-form" style="display:block;">
+                <div id="create-staff-form" class="hidden" style="margin: 1.5rem 0; padding: 1.5rem; background: white; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e5e7eb; max-width: 500px;">
+                    <h4 style="margin-top:0; margin-bottom:1rem; color:var(--primary-700); font-size: 1.1rem;">Add New Staff Member</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.5rem; color:#374151;">Full Name</label>
+                            <input type="text" id="new-staff-name" placeholder="E.g. John Doe" class="auth-form" style="display:block; width:100%;">
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.5rem; color:#374151;">Username</label>
+                            <input type="text" id="new-staff-user" placeholder="No spaces (e.g. john_doe)" class="auth-form" style="display:block; width:100%;" title="Only letters, numbers, and underscores allowed">
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.5rem; color:#374151;">Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="new-staff-pass" oninput="checkPasswordRequirements(this.value)" placeholder="Enter a secure password" class="auth-form" style="display:block; width:100%; padding-right: 3rem;">
+                            <button type="button" onclick="togglePasswordIcon('new-staff-pass', this)" style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #6b7280; padding: 0.25rem; display: flex; align-items: center; justify-content: center;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                        </div>
+                        
+                        <div id="password-requirements" style="margin-top: 0.75rem; font-size: 0.8rem; color: #ef4444; display:flex; flex-direction:column; gap:0.25rem;">
+                            <div id="req-len" style="display:flex; align-items:center; gap:0.5rem;"><span>❌</span> At least 8 characters</div>
+                            <div id="req-up" style="display:flex; align-items:center; gap:0.5rem;"><span>❌</span> One uppercase letter</div>
+                            <div id="req-num" style="display:flex; align-items:center; gap:0.5rem;"><span>❌</span> One number</div>
+                        </div>
+                    </div>
+
                     ${currentUser.role === 'head' ? `
-                    <select id="new-staff-role" class="auth-form" style="display:block;">
-                        <option value="staff">Staff</option>
-                        <option value="manager">Manager</option>
-                    </select>
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.5rem; color:#374151;">Role</label>
+                        <select id="new-staff-role" class="auth-form" style="display:block; width:100%;">
+                            <option value="staff">Staff</option>
+                            <option value="manager">Manager</option>
+                        </select>
+                    </div>
                     ` : ''}
-                    <button class="btn primary-btn" onclick="createStaff()">Create</button>
+                    
+                    <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+                        <button type="button" class="btn outline-btn" onclick="document.getElementById('create-staff-form').classList.add('hidden')">Cancel</button>
+                        <button type="button" class="btn primary-btn" onclick="createStaff()">Create Account</button>
+                    </div>
                 </div>
                 <br>
                 <table>
-                    <tr><th>Name</th><th>Username</th><th>Joined</th><th>Action</th></tr>
-                    ${rows || '<tr><td colspan="4">No staff found.</td></tr>'}
+                    <tr><th>ID</th><th>Name</th><th>Username</th><th>Joined</th><th>Action</th></tr>
+                    ${rows || '<tr><td colspan="5">No staff found.</td></tr>'}
                 </table>
             </div>
         `;
@@ -267,18 +301,29 @@ async function loadManagerStaff() {
 }
 
 async function createStaff() {
+    const fn = document.getElementById('new-staff-name').value;
     const user = document.getElementById('new-staff-user').value;
     const pass = document.getElementById('new-staff-pass').value;
     const roleEl = document.getElementById('new-staff-role');
     const role = roleEl ? roleEl.value : 'staff';
     
-    if(!user || !pass) return alert("Username and password are required");
+    if(!user || !pass || !fn) return alert("Staff Name, Username and Password are required. Please make sure all fields are filled.");
+
+    const userPattern = /^[a-zA-Z0-9_]+$/;
+    if (!userPattern.test(user)) {
+        return alert("Username must contain only letters, numbers, and underscores (no spaces).");
+    }
+
+    const passPattern = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!passPattern.test(pass)) {
+        return alert("Password must be at least 8 characters long, include an uppercase letter and a number.");
+    }
 
     try {
         const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentUser.access_token}` },
-            body: JSON.stringify({ username: user, password: pass, role: role })
+            body: JSON.stringify({ username: user, password: pass, full_name: fn, role: role })
         });
         
         if (!response.ok) throw new Error("Username taken or invalid");
@@ -290,7 +335,7 @@ async function createStaff() {
 
 async function removeStaff(id) {
     if(!confirm("Are you sure you want to remove this staff member?")) return;
-    await fetch(`${API_BASE_URL}/api/manager/staff/${id}`, {
+    await fetch(`${API_BASE_URL}/api/head/staff/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${currentUser.access_token}` }
     });
@@ -344,7 +389,7 @@ async function loadManagerEvents() {
                     <input type="text" id="ev-title" placeholder="Event Title" class="auth-form" style="display:block;">
                     <input type="date" id="ev-date" class="auth-form" style="display:block;">
                     <input type="text" id="ev-desc" placeholder="Short Description" class="auth-form" style="display:block; flex:1;">
-                    <button class="btn primary-btn" onclick="createEvent()">Save</button>
+                    <button class="btn primary-btn" onclick="saveNewEvent()">Save</button>
                 </div>
                 <br>
                 <table>
@@ -365,29 +410,38 @@ function showCreateEvent() {
     }
 }
 
-async function createEvent() {
+async function saveNewEvent() {
     const title = document.getElementById('ev-title').value;
     const date = document.getElementById('ev-date').value;
     const desc = document.getElementById('ev-desc').value;
     if(!title || !date) return alert("Title and date required");
     
-    await fetch(`${API_BASE_URL}/api/manager/events`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentUser.access_token}` },
-        body: JSON.stringify({ title, event_date: date, description: desc })
-    });
-    
-    // Reset form fields and hide
-    document.getElementById('ev-title').value = '';
-    document.getElementById('ev-date').value = '';
-    document.getElementById('ev-desc').value = '';
-    showCreateEvent();
-    
-    loadManagerEvents();
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/manager/events`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentUser.access_token}` },
+            body: JSON.stringify({ title, event_date: date, description: desc })
+        });
+        
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail || "Failed to save event");
+        }
+        
+        // Reset form fields and hide
+        document.getElementById('ev-title').value = '';
+        document.getElementById('ev-date').value = '';
+        document.getElementById('ev-desc').value = '';
+        showCreateEvent();
+        
+        loadManagerEvents();
+    } catch(e) {
+        alert(e.message);
+    }
 }
 
 async function markAttendancePrompt(eventId) {
-    const staffId = prompt("Enter Staff ID to mark as attended:");
+    const staffId = prompt("Enter Staff ID to mark as attended (Check the 'Manage Staff' tab for IDs):");
     if(!staffId) return;
     
     try {
@@ -587,4 +641,61 @@ async function generateCampaign() {
         btn.disabled = false;
         btn.textContent = "Generate Content";
     }
+}
+
+// ==========================================
+// UTILS
+// ==========================================
+function togglePassword(inputId, iconSpan) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        iconSpan.textContent = 'HIDE';
+    } else {
+        input.type = 'password';
+        iconSpan.textContent = 'SHOW';
+    }
+}
+
+function togglePasswordCheckbox(inputId, checkbox) {
+    const input = document.getElementById(inputId);
+    if (checkbox.checked) {
+        input.type = 'text';
+    } else {
+        input.type = 'password';
+    }
+}
+
+function togglePasswordIcon(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+        btn.style.color = 'var(--primary-600)';
+    } else {
+        input.type = 'password';
+        btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+        btn.style.color = '#6b7280';
+    }
+}
+
+function checkPasswordRequirements(val) {
+    const lenReq = document.getElementById('req-len');
+    const upReq = document.getElementById('req-up');
+    const numReq = document.getElementById('req-num');
+    
+    if(!lenReq) return;
+    
+    const hasLen = val.length >= 8;
+    const hasUp = /[A-Z]/.test(val);
+    const hasNum = /\d/.test(val);
+    
+    const updateReq = (el, met, text) => {
+        el.innerHTML = met ? `<span>✅</span> ${text}` : `<span>❌</span> ${text}`;
+        el.style.color = met ? '#10b981' : '#ef4444';
+    };
+    
+    updateReq(lenReq, hasLen, 'At least 8 characters');
+    updateReq(upReq, hasUp, 'One uppercase letter');
+    updateReq(numReq, hasNum, 'One number');
 }
