@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function checkAuth() {
-    const token = localStorage.getItem('np_token');
+    const token = sessionStorage.getItem('np_token');
     if (token) {
         fetchMe(token);
     } else {
@@ -54,7 +54,7 @@ async function login() {
         if (!response.ok) throw new Error("Invalid credentials");
         
         const data = await response.json();
-        localStorage.setItem('np_token', data.access_token);
+        sessionStorage.setItem('np_token', data.access_token);
         currentUser = data;
         buildDashboard();
     } catch (e) {
@@ -65,7 +65,7 @@ async function login() {
 // Signup logic moved to dashboard
 
 function logout() {
-    localStorage.removeItem('np_token');
+    sessionStorage.removeItem('np_token');
     currentUser = null;
     showView('auth-view');
 }

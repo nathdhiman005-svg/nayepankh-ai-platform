@@ -1,15 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NayePankh AI Assistant — Uplifting Underprivileged People</title>
-  <meta name="description" content="NayePankh Foundation AI Assistant - Learn about our NGO initiatives, volunteer opportunities, and social welfare programs powered by AI.">
-  <meta name="keywords" content="NayePankh Foundation, NGO, volunteer, AI assistant, social welfare, education, women empowerment">
+  <meta name="description"
+    content="NayePankh Foundation AI Assistant - Learn about our NGO initiatives, volunteer opportunities, and social welfare programs powered by AI.">
+  <meta name="keywords"
+    content="NayePankh Foundation, NGO, volunteer, AI assistant, social welfare, education, women empowerment">
   <meta property="og:title" content="NayePankh AI Assistant">
-  <meta property="og:description" content="AI-powered platform to learn about NayePankh Foundation's mission, initiatives, and volunteer opportunities.">
+  <meta property="og:description"
+    content="AI-powered platform to learn about NayePankh Foundation's mission, initiatives, and volunteer opportunities.">
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
   <!-- ========== NAVIGATION ========== -->
@@ -27,8 +32,11 @@
         <a href="#chatbot">AI Chat</a>
         <a href="#volunteer">Volunteer</a>
         <a href="#contact">Contact</a>
-        <a href="https://www.nayepankh.com/donate" target="_blank" style="color:var(--primary-600); font-weight:600;">Donate</a>
-        <a href="portal.html" style="background:var(--primary-600); color:white; padding:0.4rem 0.8rem; border-radius:0.5rem;">Staff Login</a>
+        <a href="https://www.nayepankh.com/donate" target="_blank"
+          style="color:var(--primary-600); font-weight:600;">Donate</a>
+        <a href="portal.html"
+          style="background:var(--primary-600); color:white; padding:0.4rem 0.8rem; border-radius:0.5rem;">Staff
+          Login</a>
       </div>
       <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation menu">
         <span></span>
@@ -231,14 +239,16 @@
         <div class="chat-suggestions" id="chatSuggestions">
           <button class="chat-suggestion" data-question="What does NayePankh do?">What does NayePankh do?</button>
           <button class="chat-suggestion" data-question="How can I volunteer?">How can I volunteer?</button>
-          <button class="chat-suggestion" data-question="Tell me about education initiatives">Education initiatives</button>
+          <button class="chat-suggestion" data-question="Tell me about education initiatives">Education
+            initiatives</button>
           <button class="chat-suggestion" data-question="How can I donate?">How can I donate?</button>
-          <button class="chat-suggestion" data-question="Tell me about women empowerment programs">Women empowerment</button>
+          <button class="chat-suggestion" data-question="Tell me about women empowerment programs">Women
+            empowerment</button>
         </div>
 
         <div class="chat-input-area">
           <input type="text" id="chatInput" placeholder="Ask me anything about NayePankh Foundation..."
-                 aria-label="Chat message input">
+            aria-label="Chat message input">
           <button id="chatSendBtn" aria-label="Send message">➤</button>
         </div>
       </div>
@@ -285,7 +295,8 @@
             <button type="submit" class="btn btn-primary" id="volunteerSubmitBtn" style="width:100%;">
               🔍 Get AI Recommendation
             </button>
-            <button type="button" class="btn btn-primary" id="applyVolunteerBtn" style="width:100%; margin-top: 0.75rem;">
+            <button type="button" class="btn btn-primary" id="applyVolunteerBtn"
+              style="width:100%; margin-top: 0.75rem;">
               📝 Apply for Volunteer Role
             </button>
           </form>
@@ -295,7 +306,8 @@
           <h3 style="margin-bottom: 1.5rem;">AI Recommendation</h3>
           <div class="result-placeholder" id="volunteerPlaceholder">
             <div class="icon">🎯</div>
-            <p>Fill in your profile and click "Get AI Recommendation"<br>to receive personalized volunteer suggestions!</p>
+            <p>Fill in your profile and click "Get AI Recommendation"<br>to receive personalized volunteer suggestions!
+            </p>
           </div>
           <div class="result-content" id="volunteerContent" style="display:none;"></div>
         </div>
@@ -323,7 +335,8 @@
         </div>
         <div class="form-group">
           <label for="appPhone">📞 Phone Number</label>
-          <input type="tel" id="appPhone" placeholder="e.g., +91-9876543210" required>
+          <input type="tel" id="appPhone" placeholder="e.g., +91XXXXXXXXXX" pattern="^\d{10}$"
+            title="Phone number must be exactly 10 digits" maxlength="10" required>
         </div>
         <div class="form-group">
           <label for="appRole">🎯 Preferred Role</label>
@@ -377,7 +390,8 @@
             <div class="icon">🌐</div>
             <div>
               <h4>Website</h4>
-              <p><a href="https://www.nayepankh.com" target="_blank" style="color:var(--primary-600);">www.nayepankh.com</a></p>
+              <p><a href="https://www.nayepankh.com" target="_blank"
+                  style="color:var(--primary-600);">www.nayepankh.com</a></p>
             </div>
           </div>
           <div class="contact-item">
@@ -433,20 +447,45 @@
           </p>
           <!-- Social Media Icons -->
           <div class="social-icons">
-            <a href="https://www.instagram.com/nayepankhfoundation" target="_blank" aria-label="Instagram" class="social-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            <a href="https://www.instagram.com/nayepankhfoundation" target="_blank" aria-label="Instagram"
+              class="social-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+              </svg>
             </a>
-            <a href="https://www.linkedin.com/company/nayepankh" target="_blank" aria-label="LinkedIn" class="social-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            <a href="https://www.linkedin.com/company/nayepankh" target="_blank" aria-label="LinkedIn"
+              class="social-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                <rect x="2" y="9" width="4" height="12" />
+                <circle cx="4" cy="4" r="2" />
+              </svg>
             </a>
             <a href="https://youtube.com/@nayepankhfoundation" target="_blank" aria-label="YouTube" class="social-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path
+                  d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z" />
+                <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
+              </svg>
             </a>
-            <a href="https://facebook.com/nayepankhfoundation" target="_blank" aria-label="Facebook" class="social-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            <a href="https://facebook.com/nayepankhfoundation" target="_blank" aria-label="Facebook"
+              class="social-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+              </svg>
             </a>
             <a href="https://x.com/nayepankh" target="_blank" aria-label="Twitter / X" class="social-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l11.733 16h4.267l-11.733 -16h-4.267z"/><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4l11.733 16h4.267l-11.733 -16h-4.267z" />
+                <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
+              </svg>
             </a>
           </div>
         </div>
@@ -477,4 +516,5 @@
   <!-- JavaScript -->
   <script src="script.js"></script>
 </body>
+
 </html>

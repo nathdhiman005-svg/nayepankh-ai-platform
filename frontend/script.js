@@ -467,6 +467,12 @@ volunteerApplicationForm.addEventListener("submit", async (e) => {
     return;
   }
 
+  const phonePattern = /^\d{10}$/;
+  if (!phonePattern.test(phone)) {
+    showToast("⚠️ Phone number must be exactly 10 digits!");
+    return;
+  }
+
   // Show loading state
   appSubmitBtn.disabled = true;
   appSubmitBtn.innerHTML = '<span class="spinner"></span> Submitting...';
