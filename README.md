@@ -22,6 +22,15 @@ Enter a campaign topic (e.g., "Tree Plantation Drive") and the AI generates:
 - Awareness message
 - Volunteer recruitment text
 
+### 🔒 Staff Portal & Administration
+A dedicated, role-based backend portal for NayePankh Foundation internal operations.
+- **Role Hierarchy:** Head Administrator > Manager > Staff.
+- **Internal Messaging System:** Secure, hierarchy-restricted one-to-one messaging with real-time updates and soft-deletion capabilities. Higher roles can initiate and send directives to lower roles, while peers can communicate freely.
+- **Staff Management:** Managers can create staff accounts and submit staff removal requests. Head Administrators can approve/reject removal requests and view the entire staff directory.
+- **Volunteer Management:** Public volunteer applications can be reviewed, accepted, or declined by Managers. Accepted volunteers appear on the Head Administrator's dashboard.
+- **Auto-Logout Security:** Sessions utilize `sessionStorage`, ensuring users are automatically logged out the moment the browser tab or window is closed.
+- **Form Validation:** Stricter validation across public forms (e.g., 10-digit exact phone requirements) and internal forms (real-time password strength checklists).
+
 ---
 
 ## 🛠️ Tech Stack
