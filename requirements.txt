@@ -7,3 +7,4 @@ httpx             # Async HTTP client (for calling API)
 python-dotenv    # For loading environment variables
 passlib[bcrypt]  # Password hashing
 pyjwt            # JWT authentication
+psycopg2-binary  # PostgreSQL database adapter
