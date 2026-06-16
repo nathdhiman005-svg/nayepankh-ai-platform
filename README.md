@@ -27,6 +27,12 @@ Enter a campaign topic (e.g., "Tree Plantation Drive") and the AI generates:
 
 ### 🔒 Staff Portal & Administration
 A dedicated, role-based backend portal for NayePankh Foundation internal operations.
+
+> [!TIP]
+> **Test Credentials:**
+> - **Head Admin:** `head_admin` / `admin123`
+> - **Manager:** `manager_dummy` / `manager123`
+> - **Staff:** `staff_dummy` / `staff123`
 - **Role Hierarchy:** Head Administrator > Manager > Staff.
 - **Internal Messaging System:** Secure, hierarchy-restricted one-to-one messaging with real-time updates and soft-deletion capabilities. Higher roles can initiate and send directives to lower roles, while peers can communicate freely.
 - **Staff Management:** Managers can create staff accounts and submit staff removal requests. Head Administrators can approve/reject removal requests and view the entire staff directory.
