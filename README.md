@@ -1,5 +1,8 @@
 # 🕊️ NayePankh AI Assistant
 
+> [!WARNING]
+> **Demo Notice:** This entire application and its services (both frontend and backend) are hosted on free-tier infrastructure for demonstration purposes. Due to "cold starts" and server sleeping on free tiers, **the system may run slow on initial loads**, and API responses might take 30-50 seconds to warm up. 
+
 An AI-powered webpage for **NayePankh Foundation** that helps visitors learn about the NGO, volunteering opportunities, and social initiatives — powered by **Groq API + Llama 3.3 (70B)**.
 
 ---
@@ -38,11 +41,11 @@ A dedicated, role-based backend portal for NayePankh Foundation internal operati
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | HTML, CSS, JavaScript |
-| Backend | Python, FastAPI |
-| AI Model | Groq Cloud API (Llama 3.3 70B) |
-| Database | SQLite |
-| Data | JSON |
+| Frontend | Vanilla HTML, CSS, JavaScript |
+| Backend | Python, FastAPI, Uvicorn |
+| AI Engine | Groq API (Llama 3.3 70B model) |
+| Database | PostgreSQL (hosted on Neon.tech) |
+| Deployment | Vercel (Frontend), Render (Backend) |
 
 ---
 
@@ -161,13 +164,17 @@ curl -X POST http://localhost:8000/api/generate-content \
 
 ## 📊 Database
 
-The app uses **SQLite** to store:
-- **chat_history** — All chatbot conversations
-- **recommendations** — Volunteer recommendation requests and results
-- **generated_content** — AI-generated campaign content
-- **contact_queries** — User messages submitted from the public site
-
-The database file (`nayepankh.db`) is automatically created in the `data/` directory when the server starts.
+The system uses **PostgreSQL** (via Neon.tech) to store all platform data permanently:
+- `users`: Staff, Managers, Head admins (with role-based access).
+- `chat_history`: Stores all conversations users have with the public AI chatbot.
+- `recommendations`: Stores all AI-generated volunteer role recommendations.
+- `generated_content`: Stores all AI-generated social media campaigns.
+- `events`: NGO activities created by Managers.
+- `event_attendance`: Staff registrations for events.
+- `volunteer_applications`: Public user applications via the "Volunteer Now" form.
+- `staff_removal_requests`: Requests created by managers to remove staff members.
+- `conversations` & `messages`: Internal team messaging system.
+- `contact_queries`: Public user inquiries from the "Contact Us" form.
 
 ---
 

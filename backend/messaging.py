@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List, Optional
-import sqlite3
+from psycopg2.extras import RealDictCursor
 
 from .auth import get_current_user, require_role
 from .database import (
@@ -41,9 +41,9 @@ async def search_users(q: str = "", current_user: dict = Depends(get_current_use
         return []
         
     conn = get_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     # Search by username or full_name, excluding self
-    query = "SELECT id, username, full_name, role FROM users WHERE (username LIKE ? OR full_name LIKE ?) AND id != ?"
+    query = "SELECT id, username, full_name, role FROM users WHERE (username LIKE %s OR full_name LIKE %s) AND id != %s"
     search_term = f"%{q}%"
     cursor.execute(query, (search_term, search_term, current_user['id']))
     users = [dict(row) for row in cursor.fetchall()]
@@ -72,8 +72,8 @@ async def send_message(request: MessageSendRequest, current_user: dict = Depends
         
     # Check receiver role
     conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT role FROM users WHERE id = ?", (request.receiver_id,))
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    cursor.execute("SELECT role FROM users WHERE id = %s", (request.receiver_id,))
     receiver = cursor.fetchone()
     conn.close()
     
@@ -122,8 +122,8 @@ async def reply_message(conv_id: int, request: MessageReplyRequest, current_user
     
     # Check receiver role
     conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT role FROM users WHERE id = ?", (other_user_id,))
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    cursor.execute("SELECT role FROM users WHERE id = %s", (other_user_id,))
     receiver = cursor.fetchone()
     conn.close()
     
