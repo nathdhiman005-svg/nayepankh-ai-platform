@@ -26,7 +26,7 @@ from .recommendation import router as recommendation_router
 from .content_generator import router as content_generator_router
 from .admin import router as admin_router
 from .messaging import router as messaging_router
-from .database import init_database, create_user, save_volunteer_application
+from .database import init_database, create_user, save_volunteer_application, save_contact_query
 from .auth import get_password_hash
 
 # ============================================================
@@ -147,4 +147,27 @@ async def volunteer_apply(request: VolunteerApplicationRequest):
     return {
         "status": "success",
         "message": f"Thank you {request.name}! Your volunteer application has been received."
+    }
+
+class ContactQueryRequest(BaseModel):
+    name: str
+    email: str
+    subject: str = ""
+    message: str
+
+@app.post("/api/contact")
+async def contact_us(request: ContactQueryRequest):
+    """
+    Contact Us endpoint.
+    Receives contact queries and saves them to the database.
+    """
+    save_contact_query(
+        name=request.name,
+        email=request.email,
+        subject=request.subject,
+        message=request.message
+    )
+    return {
+        "status": "success",
+        "message": "Thank you for reaching out! Your message has been saved."
     }

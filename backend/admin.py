@@ -8,7 +8,8 @@ from .database import (
     create_event, get_events, record_attendance, get_staff_attendance,
     get_dashboard_stats, get_recommendations,
     create_removal_request, get_pending_removal_requests, resolve_removal_request,
-    get_volunteer_applications_by_status, update_volunteer_application_status
+    get_volunteer_applications_by_status, update_volunteer_application_status,
+    get_contact_queries
 )
 
 router = APIRouter()
@@ -140,6 +141,11 @@ async def update_volunteer_status(application_id: int, request: VolunteerStatusR
         raise HTTPException(status_code=400, detail="Invalid status")
     update_volunteer_application_status(application_id, request.status)
     return {"message": f"Application {request.status}"}
+
+@router.get("/api/manager/queries")
+async def view_user_queries(current_user: dict = Depends(require_role(["manager", "head"]))):
+    """Managers and Heads can view user contact queries."""
+    return get_contact_queries()
 
 # ==========================================
 # HEAD ENDPOINTS

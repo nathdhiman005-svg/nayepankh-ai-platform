@@ -396,12 +396,43 @@ const fallbackInitiatives = [
 
 const contactForm = document.getElementById("contactForm");
 
-contactForm.addEventListener("submit", (e) => {
+contactForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // In a real app, this would send data to a backend
-  showToast("✅ Thank you for your message! We'll get back to you soon.");
-  contactForm.reset();
+  const name = document.getElementById("contactName").value.trim();
+  const email = document.getElementById("contactEmail").value.trim();
+  const subject = document.getElementById("contactSubject").value.trim();
+  const message = document.getElementById("contactMessage").value.trim();
+
+  if (!name || !email || !message) {
+    showToast("⚠️ Please fill in all required fields.");
+    return;
+  }
+
+  const submitBtn = contactForm.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<span class="spinner"></span> Sending...';
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/contact`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, subject, message })
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to send message");
+    }
+
+    showToast("✅ Thank you for your message! We'll get back to you soon.");
+    contactForm.reset();
+  } catch (error) {
+    showToast("❌ Could not connect to the server. Please try again later.");
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+  }
 });
 
 

@@ -28,6 +28,7 @@ A dedicated, role-based backend portal for NayePankh Foundation internal operati
 - **Internal Messaging System:** Secure, hierarchy-restricted one-to-one messaging with real-time updates and soft-deletion capabilities. Higher roles can initiate and send directives to lower roles, while peers can communicate freely.
 - **Staff Management:** Managers can create staff accounts and submit staff removal requests. Head Administrators can approve/reject removal requests and view the entire staff directory.
 - **Volunteer Management:** Public volunteer applications can be reviewed, accepted, or declined by Managers. Accepted volunteers appear on the Head Administrator's dashboard.
+- **User Queries Management:** Managers and Head Administrators can view all messages submitted through the public "Contact Us" form in a dedicated dashboard section.
 - **Auto-Logout Security:** Sessions utilize `sessionStorage`, ensuring users are automatically logged out the moment the browser tab or window is closed.
 - **Form Validation:** Stricter validation across public forms (e.g., 10-digit exact phone requirements) and internal forms (real-time password strength checklists).
 
@@ -128,9 +129,11 @@ Simply open `frontend/index.html` in your browser:
 |--------|----------|-------------|
 | GET | `/api/health` | Health check |
 | GET | `/api/ngo-info` | Get NGO information |
+| GET | `/api/manager/queries` | Get user contact queries |
 | POST | `/api/chat` | Chat with AI assistant |
 | POST | `/api/recommend` | Get volunteer recommendation |
 | POST | `/api/generate-content` | Generate campaign content |
+| POST | `/api/contact` | Submit a public contact query |
 
 ### Example API Calls
 
@@ -162,6 +165,7 @@ The app uses **SQLite** to store:
 - **chat_history** — All chatbot conversations
 - **recommendations** — Volunteer recommendation requests and results
 - **generated_content** — AI-generated campaign content
+- **contact_queries** — User messages submitted from the public site
 
 The database file (`nayepankh.db`) is automatically created in the `data/` directory when the server starts.
 

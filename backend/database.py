@@ -153,6 +153,19 @@ def init_database():
         )
     """)
 
+    # 11. Contact Queries
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS contact_queries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            subject TEXT,
+            message TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'unread',
+            timestamp TEXT NOT NULL
+        )
+    """)
+
     conn.commit()
     conn.close()
     print("[OK] Database initialized successfully!")
@@ -168,6 +181,16 @@ def save_chat(user_message: str, ai_response: str):
     cursor.execute(
         "INSERT INTO chat_history (user_message, ai_response, timestamp) VALUES (?, ?, ?)",
         (user_message, ai_response, datetime.now().isoformat())
+    )
+    conn.commit()
+    conn.close()
+
+def save_contact_query(name: str, email: str, subject: str, message: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO contact_queries (name, email, subject, message, status, timestamp) VALUES (?, ?, ?, ?, 'unread', ?)",
+        (name, email, subject, message, datetime.now().isoformat())
     )
     conn.commit()
     conn.close()
@@ -394,6 +417,14 @@ def get_recommendations(limit: int = 50):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM recommendations ORDER BY id DESC LIMIT ?", (limit,))
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+def get_contact_queries(limit: int = 100):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM contact_queries ORDER BY id DESC LIMIT ?", (limit,))
     rows = [dict(row) for row in cursor.fetchall()]
     conn.close()
     return rows

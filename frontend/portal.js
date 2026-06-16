@@ -109,6 +109,7 @@ function buildDashboard() {
             <a class="sidebar-link" onclick="loadManagerEvents()">Manage Events</a>
             <a class="sidebar-link" onclick="loadManagerVolunteers()">Volunteer Applications</a>
             <a class="sidebar-link" onclick="loadCampaignAI()">AI Campaign Generator</a>
+            <a class="sidebar-link" onclick="loadManagerQueries()">User Queries</a>
             <a class="sidebar-link" onclick="loadMessagesTab()">Messages</a>
         `;
         loadManagerStaff();
@@ -120,6 +121,7 @@ function buildDashboard() {
             <a class="sidebar-link" onclick="loadHeadRemovalRequests()">Staff Removal Requests</a>
             <a class="sidebar-link" onclick="loadHeadVolunteers()">Accepted Volunteers</a>
             <a class="sidebar-link" onclick="loadCampaignAI()">AI Campaign Generator</a>
+            <a class="sidebar-link" onclick="loadManagerQueries()">User Queries</a>
             <a class="sidebar-link" onclick="loadMessagesTab()">Messages</a>
         `;
         loadHeadDashboard();
@@ -508,6 +510,38 @@ async function updateVolunteerStatus(id, status) {
         loadManagerVolunteers();
     } catch(e) {
         alert(e.message);
+    }
+}
+
+async function loadManagerQueries() {
+    updateActiveTab(currentUser.role === 'head' ? 5 : 4);
+    const main = document.getElementById('main-content');
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/manager/queries`, {
+            headers: { 'Authorization': `Bearer ${currentUser.access_token}` }
+        });
+        const queries = await response.json();
+        
+        let rows = queries.map(q => `
+            <tr>
+                <td><strong>${q.name}</strong><br><small><a href="mailto:${q.email}">${q.email}</a></small></td>
+                <td><strong>${q.subject || 'No Subject'}</strong><br><small>${q.message}</small></td>
+                <td><small>${new Date(q.timestamp).toLocaleString()}</small></td>
+            </tr>
+        `).join('');
+
+        main.innerHTML = `
+            <div class="data-panel">
+                <h3>User Queries (Contact Us)</h3>
+                <table>
+                    <tr><th>User Details</th><th>Message</th><th>Date Received</th></tr>
+                    ${rows || '<tr><td colspan="3">No user queries found.</td></tr>'}
+                </table>
+            </div>
+        `;
+    } catch(e) {
+        main.innerHTML = `<p class="error-msg">Failed to load user queries.</p>`;
     }
 }
 
