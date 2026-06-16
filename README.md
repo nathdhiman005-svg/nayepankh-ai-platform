@@ -62,23 +62,33 @@ nayepankh-ai-platform/
 │
 ├── backend/
 │   ├── __init__.py              # Python package marker
-│   ├── main.py                  # FastAPI application
+│   ├── admin.py                 # Admin management endpoints
+│   ├── auth.py                  # Authentication and authorization
 │   ├── chat.py                  # AI Chatbot endpoint
-│   ├── recommendation.py       # Volunteer recommendation endpoint
-│   ├── content_generator.py    # Campaign content generator endpoint
-│   └── database.py             # SQLite database setup & helpers
+│   ├── content_generator.py     # Campaign content generator endpoint
+│   ├── database.py              # Database setup & helpers
+│   ├── main.py                  # FastAPI application
+│   ├── messaging.py             # Internal messaging system endpoints
+│   └── recommendation.py        # Volunteer recommendation endpoint
 │
 ├── frontend/
 │   ├── index.html               # Main webpage
-│   ├── style.css                # Styling
-│   └── script.js                # Frontend logic
+│   ├── portal.css               # Portal styling
+│   ├── portal.html              # Staff portal webpage
+│   ├── portal.js                # Staff portal frontend logic
+│   ├── script.js                # Main frontend logic
+│   └── style.css                # Main styling
 │
 ├── data/
+│   ├── nayepankh.db             # SQLite database file
 │   └── ngo_info.json            # NayePankh Foundation data
 │
+├── .env                         # Environment variables
+├── .gitignore                   # Git ignore patterns
+├── README.md                    # Project documentation
+├── render.yaml                  # Render deployment configuration
 ├── requirements.txt             # Python dependencies
-├── .gitignore
-└── README.md
+└── vercel.json                  # Vercel deployment configuration
 ```
 
 ---
