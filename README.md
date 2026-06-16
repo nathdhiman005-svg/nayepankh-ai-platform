@@ -28,7 +28,7 @@ A dedicated, role-based backend portal for NayePankh Foundation internal operati
 - **Internal Messaging System:** Secure, hierarchy-restricted one-to-one messaging with real-time updates and soft-deletion capabilities. Higher roles can initiate and send directives to lower roles, while peers can communicate freely.
 - **Staff Management:** Managers can create staff accounts and submit staff removal requests. Head Administrators can approve/reject removal requests and view the entire staff directory.
 - **Volunteer Management:** Public volunteer applications can be reviewed, accepted, or declined by Managers. Accepted volunteers appear on the Head Administrator's dashboard.
-- **User Queries Management:** Managers and Head Administrators can view all messages submitted through the public "Contact Us" form in a dedicated dashboard section.
+- **User Queries Management:** Managers and Head Administrators can view all messages submitted through the public "Contact Us" form in a dedicated dashboard section, and use a one-click "Reply" button that automatically opens a pre-filled Gmail composer with the user's email, subject, and original message.
 - **Auto-Logout Security:** Sessions utilize `sessionStorage`, ensuring users are automatically logged out the moment the browser tab or window is closed.
 - **Form Validation:** Stricter validation across public forms (e.g., 10-digit exact phone requirements) and internal forms (real-time password strength checklists).
 

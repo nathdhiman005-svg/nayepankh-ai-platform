@@ -523,20 +523,27 @@ async function loadManagerQueries() {
         });
         const queries = await response.json();
         
-        let rows = queries.map(q => `
+        let rows = queries.map(q => {
+            const subject = encodeURIComponent(`Re: ${q.subject || 'Your Query to NayePankh Foundation'}`);
+            const body = encodeURIComponent(`\n\n\n--- Original Message ---\n${q.message}`);
+            return `
             <tr>
                 <td><strong>${q.name}</strong><br><small><a href="mailto:${q.email}">${q.email}</a></small></td>
                 <td><strong>${q.subject || 'No Subject'}</strong><br><small>${q.message}</small></td>
                 <td><small>${new Date(q.timestamp).toLocaleString()}</small></td>
+                <td>
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=${q.email}&su=${subject}&body=${body}" target="_blank" class="btn primary-btn small" style="text-decoration:none;">Reply</a>
+                </td>
             </tr>
-        `).join('');
+            `;
+        }).join('');
 
         main.innerHTML = `
             <div class="data-panel">
                 <h3>User Queries (Contact Us)</h3>
                 <table>
-                    <tr><th>User Details</th><th>Message</th><th>Date Received</th></tr>
-                    ${rows || '<tr><td colspan="3">No user queries found.</td></tr>'}
+                    <tr><th>User Details</th><th>Message</th><th>Date Received</th><th>Action</th></tr>
+                    ${rows || '<tr><td colspan="4">No user queries found.</td></tr>'}
                 </table>
             </div>
         `;
